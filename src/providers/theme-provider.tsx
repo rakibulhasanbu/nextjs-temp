@@ -3,7 +3,7 @@
 import * as React from "react"
 import { ThemeProvider as NextThemesProvider, useTheme } from "next-themes"
 
-function ThemeProvider({
+function ThemeProvider ({
   children,
   ...props
 }: React.ComponentProps<typeof NextThemesProvider>) {
@@ -13,15 +13,15 @@ function ThemeProvider({
       defaultTheme="system"
       enableSystem
       disableTransitionOnChange
-      {...props}
+      { ...props }
     >
       <ThemeHotkey />
-      {children}
+      { children }
     </NextThemesProvider>
   )
 }
 
-function isTypingTarget(target: EventTarget | null) {
+function isTypingTarget (target: EventTarget | null) {
   if (!(target instanceof HTMLElement)) {
     return false
   }
@@ -34,11 +34,11 @@ function isTypingTarget(target: EventTarget | null) {
   )
 }
 
-function ThemeHotkey() {
+function ThemeHotkey () {
   const { resolvedTheme, setTheme } = useTheme()
 
   React.useEffect(() => {
-    function onKeyDown(event: KeyboardEvent) {
+    function onKeyDown (event: KeyboardEvent) {
       if (event.defaultPrevented || event.repeat) {
         return
       }
@@ -47,7 +47,7 @@ function ThemeHotkey() {
         return
       }
 
-      if (event.key.toLowerCase() !== "d") {
+      if (event.key?.toLowerCase() !== "d") {
         return
       }
 
@@ -63,7 +63,7 @@ function ThemeHotkey() {
     return () => {
       window.removeEventListener("keydown", onKeyDown)
     }
-  }, [resolvedTheme, setTheme])
+  }, [ resolvedTheme, setTheme ])
 
   return null
 }
