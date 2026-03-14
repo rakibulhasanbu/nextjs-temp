@@ -1,73 +1,62 @@
 "use client";
 
-import { Control, FieldValues, Path, PathValue } from "react-hook-form";
+import { Control, Controller, FieldValues, Path } from "react-hook-form";
 
-import {
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui/field";
 import { MultipleSelector } from "@/components/ui/multi-select";
-import { cn } from "@/lib/utils";
 
 type TCustomFormMultiSelect<T extends FieldValues> = {
   name: Path<T>;
-  label?: string;
-  placeholder?: string;
-  className?: string;
-  defaultValue?: PathValue<T, Path<T>>;
-  description?: string;
-  required?: boolean;
+  control: Control<T>;
   options: {
     value: string;
     label: string;
   }[];
-  control: Control<T>;
+  label?: string;
+  placeholder?: string;
+  description?: string;
+  disabled?: boolean;
+  required?: boolean;
+  showAsterisk?: boolean;
 };
 
 export const CustomFormMultiSelect = <T extends FieldValues> ({
-  label,
   name,
+  control,
+  options,
+  label,
   placeholder,
   description,
-  options,
-  control,
-  defaultValue,
+  disabled,
   required,
-  className,
+  showAsterisk = true,
 }: TCustomFormMultiSelect<T>) => {
   return (
-    <FormField
-      control={ control }
+    <Controller
       name={ name }
-      rules={ {
-        required: required ? `${ label || name } is required` : false,
-      } }
-      defaultValue={ defaultValue }
-      render={ ({ field, fieldState: { error } }) => (
-        <FormItem className={ cn("w-full h-fit", className) }>
-          <FormLabel>{ label }</FormLabel>
-          <FormControl>
-            <MultipleSelector
-              commandProps={ {
-                label: label || name,
-              } }
-              value={ field.value }
-              defaultOptions={ options }
-              placeholder={ placeholder || "Select an option" }
-              hidePlaceholderWhenSelected
-              emptyIndicator={
-                <p className="text-center text-sm">No results found</p>
-              }
-              onChange={ field.onChange }
-            />
-          </FormControl>
-          { description && <FormDescription>{ description }</FormDescription> }
-          <FormMessage>{ error?.message }</FormMessage>
-        </FormItem>
+      control={ control }
+      disabled={ disabled }
+      render={ ({ field, fieldState }) => (
+        <Field data-invalid={ fieldState.invalid }>
+          { label && <FieldLabel htmlFor={ name }>{ label } { showAsterisk ? required && <span className="text-red-500">*</span> : null }</FieldLabel> }
+          <MultipleSelector
+            commandProps={ {
+              label: label || name,
+            } }
+            value={ field.value }
+            defaultOptions={ options }
+            placeholder={ placeholder || "Select..." }
+            hidePlaceholderWhenSelected
+            emptyIndicator={
+              <p className="text-center text-sm">No results found</p>
+            }
+            onChange={ field.onChange }
+          />
+          { description && <FieldDescription>{ description }</FieldDescription> }
+          { fieldState.invalid && (
+            <FieldError errors={ [ fieldState.error ] } />
+          ) }
+        </Field>
       ) }
     />
   );

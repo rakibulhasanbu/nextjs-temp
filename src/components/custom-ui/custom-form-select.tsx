@@ -1,15 +1,8 @@
 "use client";
 
-import { Control, FieldValues, Path, PathValue } from "react-hook-form";
+import { Control, Controller, FieldValues, Path } from "react-hook-form";
 
-import {
-    FormControl,
-    FormDescription,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from "@/components/ui/form";
+import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui/field";
 import {
     Select,
     SelectContent,
@@ -17,85 +10,65 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { cn } from "@/lib/utils";
 
 type TCustomFormSelect<T extends FieldValues> = {
     name: Path<T>;
-    label?: string;
-    placeholder?: string;
-    className?: string;
-    defaultValue?: PathValue<T, Path<T>>;
-    description?: string;
-    disabled?: boolean;
-    required?: boolean;
+    control: Control<T>;
     options: {
         value: string;
         label: string;
     }[];
-    control: Control<T>;
+    label?: string;
+    placeholder?: string;
+    description?: string;
+    disabled?: boolean;
+    required?: boolean;
+    showAsterisk?: boolean;
 };
 
 export const CustomFormSelect = <T extends FieldValues> ({
-    label,
     name,
+    control,
+    options,
+    label,
     placeholder,
     description,
-    options,
-    control,
-    defaultValue,
     disabled,
     required,
-    className,
+    showAsterisk = true,
 }: TCustomFormSelect<T>) => {
     return (
-        <FormField
-            control={ control }
+        <Controller
             name={ name }
-            rules={ {
-                required: required ? `${ label || name } is required` : false,
-            } }
-            defaultValue={ defaultValue }
-            render={ ({ field, fieldState: { error } }) => (
-                <FormItem className={ cn("w-full h-fit", className) }>
-                    <FormLabel>
-                        { label }{ " " }
-                        { required && <span className="text-red-500">*</span> }
-                    </FormLabel>
-                    <FormControl>
-                        <Select
-                            disabled={ disabled }
-                            onValueChange={ field.onChange }
-                            defaultValue={ field.value }
-                            value={ field.value }
+            control={ control }
+            disabled={ disabled }
+            render={ ({ field, fieldState }) => (
+                <Field data-invalid={ fieldState.invalid }>
+                    { label && <FieldLabel htmlFor={ name }>{ label } { showAsterisk ? required && <span className="text-red-500">*</span> : null }</FieldLabel> }
+                    <Select
+                        name={ field.name }
+                        value={ field.value }
+                        onValueChange={ field.onChange }
+                    >
+                        <SelectTrigger
+                            id={ name }
+                            aria-invalid={ fieldState.invalid }
                         >
-                            <SelectTrigger
-                                className={ cn("w-full", {
-                                    "border-destructive": error,
-                                }) }
-                            >
-                                <SelectValue
-                                    placeholder={
-                                        placeholder || "Select an option"
-                                    }
-                                />
-                            </SelectTrigger>
-                            <SelectContent className="w-full min-w-32">
-                                { options.map((option) => (
-                                    <SelectItem
-                                        key={ option.value }
-                                        value={ option.value }
-                                    >
-                                        { option.label }
-                                    </SelectItem>
-                                )) }
-                            </SelectContent>
-                        </Select>
-                    </FormControl>
-                    { description && (
-                        <FormDescription>{ description }</FormDescription>
+                            <SelectValue placeholder={ placeholder || "Select..." } />
+                        </SelectTrigger>
+                        <SelectContent>
+                            { options.map((option) => (
+                                <SelectItem key={ option.value } value={ option.value }>
+                                    { option.label }
+                                </SelectItem>
+                            )) }
+                        </SelectContent>
+                    </Select>
+                    { description && <FieldDescription>{ description }</FieldDescription> }
+                    { fieldState.invalid && (
+                        <FieldError errors={ [ fieldState.error ] } />
                     ) }
-                    <FormMessage>{ error?.message }</FormMessage>
-                </FormItem>
+                </Field>
             ) }
         />
     );

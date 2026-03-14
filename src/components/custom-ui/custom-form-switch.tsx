@@ -1,110 +1,49 @@
 import { Switch } from "@/components/ui/switch";
-import { Control, FieldValues, Path, PathValue } from "react-hook-form";
+import { Control, Controller, FieldValues, Path } from "react-hook-form";
 
-import {
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { cn } from "@/lib/utils";
+import { Field, FieldContent, FieldDescription, FieldError, FieldLabel } from "@/components/ui/field";
 
 type TCustomFormSwitch<T extends FieldValues> = {
   name: Path<T>;
+  control: Control<T>;
   label?: string;
   description?: string;
   disabled?: boolean;
-  defaultValue?: PathValue<T, Path<T>>;
-  control: Control<T>;
   required?: boolean;
-  className?: string;
-  labelClassName?: string;
-  descriptionClassName?: string;
-  showLabels?: boolean;
-  checkedLabel?: string;
-  uncheckedLabel?: string;
-  parentClassName?: string;
-  valueMapping?: {
-    true: string;
-    false: string;
-  };
+  showAsterisk?: boolean;
 };
 
 export const CustomFormSwitch = <T extends FieldValues> ({
-  label,
-  disabled,
   name,
-  description,
   control,
-  defaultValue,
+  label,
+  description,
+  disabled,
   required,
-  className,
-  parentClassName,
-  labelClassName,
-  descriptionClassName,
-  showLabels = true,
-  checkedLabel = "Yes",
-  uncheckedLabel = "No",
-  valueMapping,
+  showAsterisk = true,
 }: TCustomFormSwitch<T>) => {
   return (
-    <FormField
-      control={ control }
+    <Controller
       name={ name }
-      rules={ {
-        required: required ? `${ label || name } is required` : false,
-      } }
-      defaultValue={ defaultValue }
-      render={ ({ field, fieldState: { error } }) => {
-        // Transform the value for display and handle value mapping
-        const displayValue = valueMapping
-          ? valueMapping.true === field.value
-            ? true
-            : false
-          : field.value;
-
-        const handleChange = (checked: boolean) => {
-          if (valueMapping) {
-            field.onChange(checked ? valueMapping.true : valueMapping.false);
-          } else {
-            field.onChange(checked);
-          }
-        };
+      control={ control }
+      disabled={ disabled }
+      render={ ({ field, fieldState }) => {
 
         return (
-          <FormItem className={ cn("w-full h-fit", className) }>
-            <div className={ cn("flex items-center gap-2", parentClassName) }>
-              { label && (
-                <FormLabel className={ cn("gap-1", labelClassName) }>
-                  { label }
-                  { required && <span className="text-red-500">*</span> }
-                </FormLabel>
-              ) }
-              <FormControl>
-                <div className="flex items-center gap-2">
-                  { showLabels && (
-                    <span className="font-medium">
-                      ({ displayValue ? checkedLabel : uncheckedLabel })
-                    </span>
-                  ) }
-                  <Switch
-                    checked={ displayValue }
-                    onCheckedChange={ handleChange }
-                    disabled={ disabled }
-                    { ...field }
-                  />
-                </div>
-              </FormControl>
-            </div>
-            { description && (
-              <FormDescription className={ descriptionClassName }>
-                { description }
-              </FormDescription>
-            ) }
-            <FormMessage>{ error?.message }</FormMessage>
-          </FormItem>
+          <Field orientation={ "horizontal" } data-invalid={ fieldState.invalid }>
+            <FieldContent>
+              { label && (<FieldLabel htmlFor={ name }>{ label } { showAsterisk ? required && <span className="text-red-500">*</span> : null } </FieldLabel>) }
+              { description && (<FieldDescription> { description } </FieldDescription>) }
+              { fieldState.invalid && (<FieldError errors={ [ fieldState.error ] } />) }
+            </FieldContent>
+            <Switch
+              id={ name }
+              name={ field.name }
+              checked={ field.value }
+              onCheckedChange={ field.onChange }
+              aria-invalid={ fieldState.invalid }
+            />
+          </Field>
         );
       } }
     />
