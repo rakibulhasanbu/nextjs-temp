@@ -1,20 +1,20 @@
 "use client";
 
-import { useState, useTransition } from "react";
 import Link from "next/link";
+import { useState, useTransition } from "react";
 
-import { registerAction } from "@/features/auth/actions";
-import { signUpFormSchema } from "@/features/auth/schemas";
-import { useAuthSuccess } from "@/features/auth/hooks/use-auth-utils";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { CustomFormError } from "@/components/custom-ui/custom-form-error";
 import { CustomFormInput } from "@/components/custom-ui/custom-form-input";
-import { Form } from "@/components/ui/form";
+import { registerAction } from "@/features/auth/actions";
+import { useAuthSuccess } from "@/features/auth/hooks/use-auth-utils";
+import { signUpFormSchema } from "@/features/auth/schemas";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { CustomButton } from "@/components/custom-ui/custom-button";
 import { Logo } from "@/components/shared/logo";
+import { FieldGroup } from "@/components/ui/field";
 
 type formValues = z.infer<typeof signUpFormSchema>;
 
@@ -57,8 +57,8 @@ export const SignUpForm = () => {
     };
 
     return (
-        <Form { ...form }>
-            <form onSubmit={ form.handleSubmit(onSubmit) }>
+        <form onSubmit={ form.handleSubmit(onSubmit) }>
+            <FieldGroup>
                 <div className="grid gap-6">
 
                     <Logo />
@@ -113,7 +113,7 @@ export const SignUpForm = () => {
                         </Link>
                     </div>
                 </div>
-            </form>
-        </Form>
+            </FieldGroup>
+        </form>
     );
 };

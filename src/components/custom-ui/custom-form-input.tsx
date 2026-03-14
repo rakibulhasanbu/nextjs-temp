@@ -1,18 +1,10 @@
 import { useState } from "react";
 
 import { Eye, EyeOff } from "lucide-react";
-import { Control, FieldValues, Path, PathValue } from "react-hook-form";
+import { Control, Controller, FieldValues, Path } from "react-hook-form";
 
-import {
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
+import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui/field";
+import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "@/components/ui/input-group";
 
 type TCustomFormInput<T extends FieldValues> = {
   name: Path<T>;
@@ -20,15 +12,14 @@ type TCustomFormInput<T extends FieldValues> = {
   placeholder: string;
   description?: string;
   disabled?: boolean;
-  defaultValue?: PathValue<T, Path<T>>;
   type?: "email" | "password" | "text" | "number" | "url";
   control: Control<T>;
   required?: boolean;
   min?: number;
   max?: number;
-  className?: string;
   autoComplete?: string;
   readOnly?: boolean;
+  showAsterisk?: boolean;
 };
 
 export const CustomFormInput = <T extends FieldValues> ({
@@ -39,83 +30,54 @@ export const CustomFormInput = <T extends FieldValues> ({
   type,
   description,
   control,
-  defaultValue,
   required,
   min,
   max,
-  className,
   autoComplete,
   readOnly,
+  showAsterisk = true,
 }: TCustomFormInput<T>) => {
-  const [ show, setShow ] = useState(false);
+  const [ inputVisible, setInputVisible ] = useState<"masked" | "visible">("masked");
 
   return (
-    <FormField
-      control={ control }
+    <Controller
       name={ name }
-      rules={ {
-        required: required ? `${ label || name } is required` : false,
-      } }
-      defaultValue={ defaultValue }
-      render={ ({ field, fieldState: { error } }) => (
-        <FormItem className={ cn("w-full h-fit", className) }>
-          { label && (
-            <FormLabel className="gap-1">
-              { label }
-              { required && <span className="text-red-500">*</span> }
-            </FormLabel>
+      control={ control }
+      disabled={ disabled }
+      render={ ({ field, fieldState }) => (
+        <Field data-invalid={ fieldState.invalid }>
+          { label && <FieldLabel htmlFor={ name }>{ label } { showAsterisk ? required && <span className="text-red-500">*</span> : null }</FieldLabel> }
+          <InputGroup>
+            <InputGroupInput
+              { ...field }
+              id={ name }
+              type={ type === "password" ? (inputVisible === "visible" ? "text" : "password") : type || "text" }
+              aria-invalid={ fieldState.invalid }
+              placeholder={ placeholder }
+              autoComplete={ autoComplete }
+              readOnly={ readOnly }
+              min={ min }
+              max={ max }
+            />
+            { type === "password" && (
+              <InputGroupAddon align="inline-end">
+                <InputGroupButton
+                  type="button"
+                  className="cursor-pointer"
+                  title={ inputVisible === "visible" ? "Hide password" : "Show password" }
+                  aria-label={ inputVisible === "visible" ? "Hide password" : "Show password" }
+                  onClick={ () => setInputVisible((prev) => prev === "masked" ? "visible" : "masked") }
+                >
+                  { inputVisible === "visible" ? <Eye /> : <EyeOff /> }
+                </InputGroupButton>
+              </InputGroupAddon>
+            ) }
+          </InputGroup>
+          { description && <FieldDescription>{ description }</FieldDescription> }
+          { fieldState.invalid && (
+            <FieldError errors={ [ fieldState.error ] } />
           ) }
-          <FormControl>
-            <div className="relative">
-              <Input
-                placeholder={ placeholder }
-                type={
-                  (type === "password" ? (show ? "text" : "password") : type) ||
-                  "text"
-                }
-                { ...field }
-                value={
-                  type === "number"
-                    ? field.value
-                      ? Number(field.value)
-                      : ""
-                    : field.value
-                }
-                onChange={ (e) =>
-                  field.onChange(
-                    type === "number" ? Number(e.target.value) : e.target.value
-                  )
-                }
-                onWheel={ (e) => {
-                  if (type === "number") {
-                    (e.target as HTMLInputElement).blur();
-                  }
-                } }
-                disabled={ disabled }
-                min={ min }
-                max={ max }
-                autoComplete={ autoComplete }
-                readOnly={ readOnly }
-              />
-              { type === "password" &&
-                (show ? (
-                  <Eye
-                    onClick={ () => setShow((prev) => !prev) }
-                    className="absolute right-4 top-[30%] cursor-pointer"
-                    size={ 16 }
-                  />
-                ) : (
-                  <EyeOff
-                    onClick={ () => setShow((prev) => !prev) }
-                    className="absolute right-4 top-[30%] cursor-pointer"
-                    size={ 16 }
-                  />
-                )) }
-            </div>
-          </FormControl>
-          { description && <FormDescription>{ description }</FormDescription> }
-          <FormMessage>{ error?.message }</FormMessage>
-        </FormItem>
+        </Field>
       ) }
     />
   );

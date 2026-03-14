@@ -3,10 +3,9 @@
 import Link from "next/link";
 import { useState, useTransition } from "react";
 
-import { loginAction } from "@/features/auth/actions";
 import { CustomFormError } from "@/components/custom-ui/custom-form-error";
 import { CustomFormInput } from "@/components/custom-ui/custom-form-input";
-import { Form } from "@/components/ui/form";
+import { loginAction } from "@/features/auth/actions";
 import { useAuthSuccess } from "@/features/auth/hooks/use-auth-utils";
 import { signInFormSchema } from "@/features/auth/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,6 +14,7 @@ import { z } from "zod";
 
 import { CustomButton } from "@/components/custom-ui/custom-button";
 import { Logo } from "@/components/shared/logo";
+import { FieldGroup } from "@/components/ui/field";
 
 export const SignInForm = () => {
     const form = useForm<z.infer<typeof signInFormSchema>>({
@@ -47,8 +47,8 @@ export const SignInForm = () => {
     };
 
     return (
-        <Form { ...form }>
-            <form onSubmit={ form.handleSubmit(onSubmit) }>
+        <form onSubmit={ form.handleSubmit(onSubmit) }>
+            <FieldGroup>
                 <div className="grid gap-6">
                     <Logo />
 
@@ -100,7 +100,7 @@ export const SignInForm = () => {
                         </Link>
                     </div>
                 </div>
-            </form>
-        </Form>
+            </FieldGroup>
+        </form>
     );
 };

@@ -3,24 +3,24 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
-import { verifyEmailAction } from "@/features/auth/actions";
 import { CustomOTPFormInput } from "@/components/custom-ui/custom-OTP-form-input";
-import { CardDescription, CardTitle } from "@/components/ui/card";
-import { Form } from "@/components/ui/form";
-import { REGEXP_ONLY_DIGITS } from "@/components/ui/input-otp";
-import { Separator } from "@/components/ui/separator";
-import { toast } from "sonner";
-import { useAuthSuccess } from "@/features/auth/hooks/use-auth-utils";
+import { verifyEmailAction } from "@/features/auth/actions";
 import { useReSendVerificationSignupOTPMutation } from "@/features/auth/api";
+import { useAuthSuccess } from "@/features/auth/hooks/use-auth-utils";
 import { logoutThunkWithoutReload } from "@/features/auth/slice";
-import { useAppDispatch, useAppSelector } from "@/redux/hook";
 import { UserRole } from "@/features/auth/types";
+import { useAppDispatch, useAppSelector } from "@/redux/hook";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { Mail } from "lucide-react";
+import Link from "next/link";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import { CustomButton } from "@/components/custom-ui/custom-button";
+import { Logo } from "@/components/shared/logo";
+import { FieldGroup } from "@/components/ui/field";
 import { useTimeCounter } from "@/hooks/use-time-counter";
 import { ErrorResponse } from "@/redux/types";
 
@@ -41,7 +41,6 @@ const OTPVerifyForm = () => {
     const [ isOtpSent, setIsOtpSent ] = useState(false);
     const { countingTime, isEnd, reset } = useTimeCounter(30, isOtpSent);
 
-    const [ error, setError ] = useState<string | null>(null);
     const [ resendSuccess, setResendSuccess ] = useState(false);
     const [ isPending, startTransition ] = useTransition();
     const [ reSendVerificationSignupOTP, { isLoading: isResendLoading } ] = useReSendVerificationSignupOTPMutation();
@@ -76,7 +75,7 @@ const OTPVerifyForm = () => {
                     form.reset();
                     toast.error("The verification code has been resent.");
                 } else {
-                    setError(response.error || "Invalid OTP. Please try again.");
+                    form.setError("otp", { message: response.error || "Invalid OTP. Please try again." });
                 }
             }
         });
@@ -84,11 +83,11 @@ const OTPVerifyForm = () => {
 
     const handleResendOpt = async () => {
         if (!email || email.trim() === "") {
-            setError("You are not authorized");
+            form.setError("otp", { message: "You are not authorized" });
             return handleBackToSignIn();
         }
 
-        setError(null);
+        form.clearErrors("otp");
         setResendSuccess(false);
 
         await reSendVerificationSignupOTP({ email: user.email })
@@ -116,37 +115,16 @@ const OTPVerifyForm = () => {
     };
 
     return (
-        <Form { ...form }>
-            <form onSubmit={ form.handleSubmit(handleSubmit) } className="overflow-hidden sm:w-sm">
-                <div className="mb-6 text-center">
-                    {/* <Image
-                        src={ logo }
-                        alt="Logo"
-                        width={ 40 }
-                        height={ 40 }
-                        className="mx-auto mb-1 flex items-center justify-center"
-                    /> */}
+        <form onSubmit={ form.handleSubmit(handleSubmit) }>
+            <FieldGroup>
+                <Logo />
 
-                    <CardTitle className="bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-2xl font-bold text-transparent italic">
-                        Verification <span className="">Code</span>
-                    </CardTitle>
-                    <CardDescription className="text-base text-gray-600">
-                        { email && (
-                            <>
-                                We&apos;ve sent a verification code to <span className="font-semibold">{ email }</span>
-                            </>
-                        ) }
-                        { !email && "We have sent a verification code to your email address" }
-                    </CardDescription>
+                <div className="space-y-1">
+                    <h1 className="text-2xl font-semibold">Verification Code</h1>
+                    <p className="text-sm text-muted-foreground">We&apos;ve sent a verification code to <span className="font-semibold">{ email || "your email address" }</span></p>
                 </div>
 
-                <CustomOTPFormInput pattern={ REGEXP_ONLY_DIGITS } control={ form.control } name="otp" placeholder="*" />
-
-                { error && (
-                    <div className="rounded-md bg-red-50 p-3 text-sm text-red-800 dark:bg-red-900/20 dark:text-red-400">
-                        { error }
-                    </div>
-                ) }
+                <CustomOTPFormInput pattern={ REGEXP_ONLY_DIGITS } control={ form.control } name="otp" />
 
                 { resendSuccess && (
                     <div className="rounded-md bg-green-50 p-3 text-sm text-green-800 dark:bg-green-900/20 dark:text-green-400">
@@ -160,41 +138,32 @@ const OTPVerifyForm = () => {
                     </div>
                 ) }
 
-                <CustomButton isLoading={ isPending } className="mt-6 w-full" type="submit">
+                <CustomButton isLoading={ isPending } className="w-full" type="submit">
                     Verify Email
                 </CustomButton>
 
-                <div className="mt-4 text-center text-sm">
-                    <span className="text-muted-foreground">Didn&apos;t receive the code? </span>
-                    <button
-                        type="button"
-                        onClick={ handleResendOpt }
-                        disabled={ isResendLoading || (isOtpSent && !isEnd) }
-                        className="text-primary font-semibold hover:underline disabled:opacity-50"
-                    >
-                        { isResendLoading ? "Sending..." : "Resend" }
-                    </button>
-                    { isOtpSent && !isEnd && <span className="text-muted-foreground ml-1">(after { countingTime }s)</span> }
+                <div className="space-y-2">
+                    <div className="text-center text-sm">
+                        <span className="text-muted-foreground">Didn&apos;t receive the code? </span>
+                        <button
+                            type="button"
+                            onClick={ handleResendOpt }
+                            disabled={ isResendLoading || (isOtpSent && !isEnd) }
+                            className="text-primary font-semibold hover:underline disabled:opacity-50"
+                        >
+                            { isResendLoading ? "Sending..." : "Resend" }
+                        </button>
+                        { isOtpSent && !isEnd && <span className="text-muted-foreground ml-1">(after { countingTime }s)</span> }
+                    </div>
+
+                    <div className="text-center text-sm flex items-center justify-center gap-2">
+                        <span className="text-muted-foreground block">OR</span>
+                        <Link href="/auth/sign-in" className="text-primary font-semibold hover:underline">Back to Sign In</Link>
+                    </div>
                 </div>
 
-                <div className="my-2 flex items-center justify-center text-center text-sm">
-                    <Separator className="w-1/2" />
-                    <span className="text-muted-foreground mx-2">OR</span>
-                    <Separator className="w-1/2" />
-                </div>
-
-                <div className="text-center text-sm">
-                    <span className="text-muted-foreground">Back to </span>
-                    <button
-                        type="button"
-                        onClick={ handleBackToSignIn }
-                        className="text-primary cursor-pointer font-semibold hover:underline"
-                    >
-                        Sign In
-                    </button>
-                </div>
-            </form>
-        </Form>
+            </FieldGroup>
+        </form>
     );
 };
 
