@@ -289,6 +289,7 @@ export const MultipleSelector = React.forwardRef<
 
     useEffect(() => {
       if (value) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setSelected(value);
       }
     }, [ value ]);
@@ -300,6 +301,7 @@ export const MultipleSelector = React.forwardRef<
       }
       const newOption = transToGroupOption(arrayOptions || [], groupBy);
       if (JSON.stringify(newOption) !== JSON.stringify(options)) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setOptions(newOption);
       }
     }, [ arrayDefaultOptions, arrayOptions, groupBy, onSearch, options ]);
@@ -420,7 +422,7 @@ export const MultipleSelector = React.forwardRef<
     );
 
     /** Avoid Creatable Selector freezing or lagging when paste a long string. */
-    const commandFilter = React.useCallback(() => {
+    const commandFilter = () => {
       if (commandProps?.filter) {
         return commandProps.filter;
       }
@@ -432,7 +434,7 @@ export const MultipleSelector = React.forwardRef<
       }
       // Using default filter in `cmdk`. We don&lsquo;t have to provide it.
       return undefined;
-    }, [ creatable, commandProps?.filter ]);
+    };
 
     return (
       <Command
