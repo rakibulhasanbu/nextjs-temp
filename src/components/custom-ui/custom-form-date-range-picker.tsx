@@ -84,24 +84,26 @@ export const CustomFormDateRangePicker = <T extends FieldValues> ({
                         </FieldLabel>
                     ) }
                     <Popover>
-                        <PopoverTrigger asChild>
-                            <Button
-                                variant="outline"
-                                aria-invalid={ fieldState.invalid }
-                                className={ cn(
-                                    "w-full justify-start text-left font-normal h-auto min-h-[38px]",
-                                    !field.value?.from && "text-muted-foreground",
-                                    fieldState.invalid && "border-destructive"
-                                ) }
-                                disabled={ disabled }
-                            >
+                        <PopoverTrigger
+                            render={
+                                <Button
+                                    variant="outline"
+                                    aria-invalid={ fieldState.invalid }
+                                    className={ cn(
+                                        "w-full justify-start text-left font-normal h-auto min-h-[38px]",
+                                        !field.value?.from && "text-muted-foreground",
+                                        fieldState.invalid && "border-destructive"
+                                    ) }
+                                    disabled={ disabled }
+                                />
+                            }
+                        >
                                 <CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
                                 { field.value?.from ? (
                                     formatDateRange(field.value)
                                 ) : (
                                     <span>{ placeholder }</span>
                                 ) }
-                            </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0" align="start">
                             <Calendar

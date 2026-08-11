@@ -21,8 +21,11 @@ const CustomTooltip = ({
     return (
         <TooltipProvider>
             <Tooltip>
-                <TooltipTrigger className="cursor-pointer" asChild={asChild}>
-                    {trigger}
+                <TooltipTrigger
+                    className="cursor-pointer"
+                    render={asChild ? (trigger as React.ReactElement) : undefined}
+                >
+                    {asChild ? undefined : trigger}
                 </TooltipTrigger>
                 <TooltipContent sideOffset={sideOffset}>
                     {text ? <p className="text-sm">{text}</p> : <div className={cn(className)}>{children}</div>}

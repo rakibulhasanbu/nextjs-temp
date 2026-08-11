@@ -52,25 +52,27 @@ export const CustomSearchSelect = ({
         <div className={cn("w-full space-y-1", className)}>
             {label && <div className="text-sm font-medium">{label}</div>}
             <Popover open={open} onOpenChange={setOpen}>
-                <PopoverTrigger asChild>
-                    <Button
-                        variant="secondary"
-                        role="combobox"
-                        aria-expanded={open}
-                        className={cn(
-                            "hover:border-border w-full justify-between border text-sm hover:bg-transparent",
-                            error && "border-destructive"
-                        )}
-                        disabled={disabled}
-                    >
+                <PopoverTrigger
+                    render={
+                        <Button
+                            variant="secondary"
+                            role="combobox"
+                            aria-expanded={open}
+                            className={cn(
+                                "hover:border-border w-full justify-between border text-sm hover:bg-transparent",
+                                error && "border-destructive"
+                            )}
+                            disabled={disabled}
+                        />
+                    }
+                >
                         {value
                             ? options.find((opt) => opt.value === value)?.label
                             : placeholder}
                         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
                 </PopoverTrigger>
                 <PopoverContent
-                    className="w-(--radix-popover-trigger-width)! p-0"
+                    className="w-(--anchor-width)! p-0"
                     style={{
                         left: "50%",
                         minWidth: "200px",

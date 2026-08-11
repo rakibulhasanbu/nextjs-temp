@@ -60,30 +60,32 @@ export const CustomFormSearchSelect = <T extends FieldValues> ({
         <Field data-invalid={ fieldState.invalid }>
           { label && <FieldLabel htmlFor={ name }>{ label } { showAsterisk ? required && <span className="text-red-500">*</span> : null }</FieldLabel> }
           <Popover open={ open } onOpenChange={ setOpen }>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                role="combobox"
-                aria-expanded={ open }
-                aria-invalid={ fieldState.invalid }
-                className={ cn(
-                  "w-full justify-between h-auto min-h-9 text-sm bg-transparent hover:bg-transparent font-normal",
-                  field.value ? "text-foreground" : "text-muted-foreground",
-                  {
-                    "border-destructive": fieldState.invalid,
-                  }
-                ) }
-                disabled={ disabled }
-              >
+            <PopoverTrigger
+              render={
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={ open }
+                  aria-invalid={ fieldState.invalid }
+                  className={ cn(
+                    "w-full justify-between h-auto min-h-9 text-sm bg-transparent hover:bg-transparent font-normal",
+                    field.value ? "text-foreground" : "text-muted-foreground",
+                    {
+                      "border-destructive": fieldState.invalid,
+                    }
+                  ) }
+                  disabled={ disabled }
+                />
+              }
+            >
                 { field.value
                   ? options.find((option) => option.value === field.value)
                     ?.label
                   : placeholder || "Select..." }
                 <ChevronsUpDown className="opacity-50 ml-2 h-4 w-4 shrink-0" />
-              </Button>
             </PopoverTrigger>
             <PopoverContent
-              className="w-(--radix-popover-trigger-width)! p-0"
+              className="w-(--anchor-width)! p-0"
               style={ {
                 left: "50%",
                 minWidth: "200px",
