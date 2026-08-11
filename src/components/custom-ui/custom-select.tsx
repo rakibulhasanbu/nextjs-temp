@@ -43,7 +43,7 @@ export const CustomSelect = ({
             <div className="relative">
                 <Select
                     disabled={disabled}
-                    onValueChange={onChange}
+                    onValueChange={(value) => onChange(value ?? "")}
                     value={value}
                     required={required}
                 >

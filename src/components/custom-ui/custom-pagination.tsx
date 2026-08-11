@@ -152,7 +152,7 @@ export const CustomPagination = ({
                 { showRowsPerPage && (
                     <div className="flex items-center space-x-2 max-md:hidden">
                         <p className="text-sm font-medium">Rows per page</p>
-                        <Select value={ `${ pageSize }` } onValueChange={ handleLimitChange }>
+                        <Select value={ `${ pageSize }` } onValueChange={ (value) => handleLimitChange(value ?? "") }>
                             <SelectTrigger className="h-8 w-[70px]">
                                 <SelectValue placeholder={ pageSize } />
                             </SelectTrigger>
