@@ -1,205 +1,213 @@
-# project (pass 2 — overlays)
+# project (pass 3 — menus/nav)
 
-2026-08-11. Whole-project mode, pass 2 of N (overlay/positioner components,
-in dependency order — all 6 depend only on the already-migrated `button`).
-`components.json` style stays `radix-nova` — flips to `base-nova` only once
-every remaining component across future passes is done, not after this pass.
+2026-08-11. Whole-project mode, pass 3 of N (menu family + navigation +
+misc remaining wrappers, in dependency order — all depend only on the
+already-migrated `button`/`tooltip`). `components.json` style stays
+`radix-nova` — this was the LAST pass for the 25 stock `ui/*.tsx` wrappers;
+the style flip to `base-nova` is a follow-up decision for the user, not
+done automatically by this pass (see "Remaining radix-ui count" below).
 
 ## Scope
 
-dialog, alert-dialog, sheet, popover, tooltip, hover-card — all 6 migrated.
-See individual `.migration/<component>.md` reports for per-component detail.
+dropdown-menu, select, breadcrumb, item, menubar, navigation-menu, tabs,
+toggle-group, sidebar — all 9 migrated. combobox — verified already fully
+on Base UI (no Radix imports at all), closed out with its own report per
+the task's instruction. See individual `.migration/<component>.md` reports
+for per-component detail.
 
-## Rebase note (worktree was behind)
+## Rebase note (worktree was behind, again)
 
-This worktree's branch was created before pass 1 landed on local `main`
-(commits `0aec48e`, `030339a`, `1345bc8` — button/label/separator/badge/
-avatar; skeleton/progress/switch/checkbox/toggle;
-collapsible/accordion/scroll-area/slider/radio-group). Ran
-`git rebase main` before starting so this pass builds on pass 1's actual
-committed state instead of redoing or conflicting with it. Confirmed after
-rebase: `.migration/*.md` for all 15 pass-1 components present, and
-`grep -rl "radix-ui\|@radix-ui" src/components/ui/*.tsx` showed exactly the
-15 remaining files pass-1's own `project.md` predicted (dialog,
-alert-dialog, sheet, popover, tooltip, hover-card among them, plus
-breadcrumb, dropdown-menu, item, menubar, navigation-menu, select, sidebar,
-tabs, toggle-group).
+Same staleness pattern passes 1 and 2 both hit: this worktree's branch was
+created before pass 2 landed on local `main`. Ran `git rebase main` before
+starting (first step, per the task instructions) — `git log --oneline
+main..HEAD` was empty immediately after rebase (branch had zero commits of
+its own yet) and `git merge-base --is-ancestor main HEAD` succeeded,
+confirming a clean rebase onto pass 2's actual committed state before any
+pass-3 edits began.
 
 ## Preflight
 
 - `npx shadcn@latest info --json`: style `radix-nova`, base color
   `neutral`, Tailwind v4, `iconLibrary: lucide`, pnpm package manager, `ui`
-  alias `@/components/ui`. Matches the task's stated context and pass-1's
-  preflight.
-- `node_modules` was missing in this worktree (fresh worktree checkout) —
-  ran `pnpm install` first (baseline install, not a migration change).
-- Baseline `pnpm typecheck` (before any pass-2 edits, after rebase+install)
-  reproduces the exact same pre-existing, unrelated error pass-1 documented:
-  `src/components/custom-ui/CustomErrorOrEmpty.tsx(3,24): error TS2307:
-  Cannot find module '@/assets/images/empty.png'`. Confirmed pre-existing
-  again, not caused by this pass.
-- `@base-ui/react` and `radix-ui@^1.6.2` (package.json range; `1.6.7`
-  resolved) coexist; radix-ui was NOT removed — 9 other
-  `src/components/ui/*.tsx` files still depend on it after this pass (see
-  count below).
+  alias `@/components/ui`. Matches passes 1-2's preflight and the task's
+  stated context.
+- `node_modules` was missing in this fresh worktree checkout — ran `pnpm
+  install` first (baseline, not a migration change).
+- Baseline `pnpm typecheck` (after rebase + install, before any pass-3
+  edits) reproduces the same single pre-existing, unrelated error passes
+  1-2 documented: `src/components/custom-ui/CustomErrorOrEmpty.tsx(3,24):
+  error TS2307: Cannot find module '@/assets/images/empty.png'`. Confirmed
+  pre-existing, not caused by this pass. (Note: this error does NOT
+  reproduce inside `pnpm build`'s TypeScript pass, since that file is
+  outside the build's reachable module graph — `pnpm build` succeeds
+  cleanly, see "Final verification" below.)
+- `@base-ui/react@1.7.0` and `radix-ui@1.6.7` (resolved) coexisted at the
+  start of this pass; radix-ui is NOT removed from `package.json` yet —
+  removal is a follow-up step for whoever flips `components.json`'s style,
+  not done in this pass per the task's explicit instruction not to touch
+  that yet.
 
 ## Classification method
 
 Fetched `https://ui.shadcn.com/r/styles/radix-nova/<component>.json` for
-each of the 6 target components and diffed against the local file
-(normalizing the registry-internal alias
-`@/registry/radix-nova/lib/utils` -> `@/lib/utils`,
-`@/registry/radix-nova/ui/button` -> `@/components/ui/button`, and
-CRLF/LF). All 6 matched exactly (PRISTINE) once two resolution artifacts
-were accounted for — same pattern pass-1 documented for checkbox/accordion:
+each of the 9 target components (plus `combobox` for verification) and
+diffed against the local file, normalizing the same artifacts documented in
+passes 1-2: registry-internal alias rewrites
+(`@/registry/radix-nova/lib/utils` -> `@/lib/utils`,
+`@/registry/radix-nova/ui/*` -> `@/components/ui/*`,
+`@/registry/radix-nova/hooks/*` -> `@/hooks/*`), CRLF/LF, and
+`IconPlaceholder` -> the project's resolved `lucide-react` icon (confirmed
+`iconLibrary: "lucide"` again). One additional artifact confirmed again
+this pass, consistent with passes 1-2's finding: this project has **zero**
+`cn-*` companion-class hook usage anywhere (`grep -rn "cn-menu\|cn-popover\|
+cn-tooltip\|cn-select" src` — zero hits), so every `cn-menu-target
+cn-menu-translucent`/`cn-rtl-flip` class the raw registry JSON carries was
+dropped as a resolution artifact, not a customization, in every affected
+file (`dropdown-menu`, `select`, `breadcrumb`, `menubar`,
+`navigation-menu`, `sidebar`).
 
-1. `IconPlaceholder` (raw registry template placeholder for
-   `dialog`/`sheet`'s close-button icon) -> `XIcon` from `lucide-react`
-   (this project's resolved `iconLibrary: "lucide"`).
-2. **New in this pass**: a `cn-font-heading` utility class appears on
-   `DialogTitle`/`SheetTitle`/`AlertDialogTitle` in the raw registry JSON
-   but not in any local file. Confirmed via `grep` that `cn-font-heading`
-   is not defined in `src/app/globals.css` or referenced anywhere else in
-   the project — this project's resolved preset has `fontHeading:
-   "inherit"` (no distinct heading font configured), and the CLI's real
-   resolution drops the class in that case the same way it resolves
-   `IconPlaceholder` against `iconLibrary`. Treated as a resolution
-   artifact, not a customization, and dropped in all 3 affected files to
-   match what `shadcn add --overwrite` would have delivered if the style
-   were already `base-nova`.
+All 9 target components classified PRISTINE — no real local customizations
+found beyond the resolution artifacts above, EXCEPT one already-applied fix
+that had to be identified and correctly carried forward rather than
+duplicated: `sidebar.tsx`'s pass-2 `TooltipTrigger asChild` -> `render`
+one-off fix (documented in pass 2's `project.md`) was present in the
+pre-pass-3 file and is subsumed by this pass's full golden rewrite (the
+base-nova golden's `SidebarMenuButton` already expresses the fixed shape
+natively via `useRender`). `item.tsx` was specifically re-checked for local
+customizations per the task's explicit callout and found byte-identical to
+the golden (no customization at all).
 
-`alert-dialog.tsx` additionally differed in **formatting only**: it already
-carried prettier's `semi: true` style (semicolons) because pass-1's
-consumer sweep touched it for a `Button asChild -> render` fix, which is
-one of the 4 files pass-1's `project.md` explicitly flagged as
-non-migration touches that happened to pick up prettier formatting. This
-pass's full-file rewrite reverts it to the same no-semicolon style as
-every other file in this pass (and every other `ui/*.tsx` file in the
-repo), consistent with pass-1's note that a repo-wide format pass is a
-deliberate future decision, not something migrations should do
-incidentally.
+`combobox.tsx` was NOT classified via the pristine/customized diff
+methodology above, since it carries zero Radix imports to begin with (built
+directly on Base UI's native `Combobox` primitive from `@base-ui/react`,
+not composed from `popover.tsx`/`command.tsx` as a naive reading of "built
+on top of" might suggest). Verified clean and closed out with its own
+report; see `combobox.md`.
 
 ## Why URL-fetch instead of `shadcn add --overwrite`
 
-Same reasoning as pass 1: `components.json`'s `style` stays `radix-nova`
-until every remaining component is migrated, so `shadcn add --overwrite`
-right now would re-deliver the *radix* variant. Fetched
-`https://ui.shadcn.com/r/styles/base-nova/<component>.json` directly for
-each of the 6 and wrote the (alias-fixed, icon/heading-resolved) content
-straight to `src/components/ui/<component>.tsx`.
+Same reasoning as passes 1-2: `components.json`'s `style` stays
+`radix-nova` (this pass was told explicitly not to flip it yet, even though
+it is the last pass for the 25 stock wrappers — that decision belongs to
+the user). Fetched `https://ui.shadcn.com/r/styles/base-nova/<component>.json`
+directly for each of the 9 targets and wrote the (alias-fixed,
+icon-resolved, `cn-*`-stripped) content straight to
+`src/components/ui/<component>.tsx`.
 
 ## Behavior-delta flags (per the task's explicit callouts for this family)
 
-- **Dialog/Sheet focus return**: no delta found for `dialog.tsx` itself
-  (no consumer used `onOpenAutoFocus`/`onCloseAutoFocus`). `alert-dialog.tsx`
-  DOES have a real delta: Radix auto-focuses `Cancel` on open, Base UI
-  focuses the first tabbable element instead — flagged in `alert-dialog.md`,
-  not patched (no live consumer depends on it; the one file that uses these
-  parts, `custom-alert-dialogue.tsx`, is unused dead code in this repo).
-- **Popover Anchor**: confirmed no Base UI equivalent exists. Kept
-  `PopoverAnchor` as an inert `<div>` passthrough (renders children, does
-  nothing else) so any future import keeps compiling — flagged in
-  `popover.md`, not silently reimplemented. Zero current consumers use it.
-- **Tooltip delay feel**: `TooltipContent`'s `sideOffset` default shifted
-  `0` (old, stock radix-nova) -> `4` (stock base-nova) since the local file
-  was otherwise pristine — took the stock default rather than preserving
-  the old value. `TooltipProvider`'s `delayDuration` -> `delay` rename is
-  transparent (no consumer overrides it; both this app's Provider and
-  every consumer leave delay at the wrapper's explicit `0`). HoverCard's
-  default open delay also shifts `700ms` -> `600ms` (Base UI Trigger
-  default) since neither the wrapper nor any consumer overrides it. All
-  flagged in their respective `.md` files, none patched.
-- **Sheet slide animation mechanism**: stock `base-nova` sheet swapped
-  Radix's `animate-in`/`animate-out` keyframe utilities for Base UI's
-  `data-starting-style`/`data-ending-style` transition-based hooks with
-  explicit per-side translate values. Carried over verbatim from the
-  registry pair (not introduced by this migration); flagged in `sheet.md`
-  since there's no live `Sheet` consumer yet to visually confirm against.
+- **Menu items not closing on click**: `DropdownMenuCheckboxItem`/
+  `DropdownMenuRadioItem`/`MenubarCheckboxItem`/`MenubarRadioItem` now
+  default `closeOnClick={false}` (Base UI default for these two item
+  types), vs. Radix's close-on-select-unless-prevented default. No live
+  consumer of either wrapper exists in this app; flagged in
+  `dropdown-menu.md`/`menubar.md`, not patched.
+- **NavigationMenu 50ms delay**: Root `delayDuration`(200ms Radix default)
+  -> `delay`(50ms Base UI default); `skipDelayDuration` dropped with no
+  equivalent. Flagged in `navigation-menu.md`, not patched.
+- **Tabs manual activation default**: Base UI 1.7.0 defaults
+  `List.activateOnFocus` to `false` (Radix defaulted to automatic
+  activation). Per the skill's explicit rule and `wrapper-shapes.md`'s tabs
+  note, the base-nova golden does NOT add `activateOnFocus` — matched
+  exactly, flagged in `tabs.md`, not silently patched.
+- **Select anatomy**: `SelectValue` renders the raw value string by default
+  rather than the selected Item's `ItemText` content (no `items`/`children`
+  formatter wired up by any of this app's 3 consumers, so no visible
+  difference in practice — flagged in `select.md` for awareness).
+  `position="popper"|"item-aligned"` dropped in favor of
+  `alignItemWithTrigger`; zero consumers used the old prop.
+- **ToggleGroup `rovingFocus={false}`**: no equivalent, roving focus always
+  on in Base UI. No consumer used it; flagged in `toggle-group.md`.
+- **NavigationMenu Indicator**: per the skill's hard-rule list ("Popover
+  Anchor and NavigationMenu Indicator have no equivalent: inert passthrough
+  + flag"), this was checked carefully against the ACTUAL installed
+  `@base-ui/react@1.7.0` package rather than assumed inert — a real
+  `NavigationMenuPrimitive.Icon` part does exist
+  (`node_modules/@base-ui/react/navigation-menu/icon/`), and the base-nova
+  golden registry repurposes it as a floating popup-caret indicator, not an
+  inert stub. Kept the golden's real (compiling, rendering) implementation
+  rather than hand-rolling a passthrough, but flagged clearly in
+  `navigation-menu.md`: it does not reproduce Radix's sliding
+  underline-tracks-the-active-trigger visual — there is no Base UI part
+  that does.
 
 ## App-code sweep
 
-Consumer break surface for this pass, swept via
-`grep -rln "from \"@/components/ui/<dialog|alert-dialog|sheet|popover|tooltip|hover-card>\"" src`
-plus a full-repo grep for every `consumer-props.md` token
-(`onOpenAutoFocus`, `onCloseAutoFocus`, `onEscapeKeyDown`,
-`onPointerDownOutside`, `onInteractOutside`, `disableHoverableContent`,
-`openDelay`, `closeDelay`, `delayDuration`) and a final full-repo
-`asChild` grep to confirm nothing outside this pass's scope was missed:
+This pass's task brief called out dropdown-menu/select/navigation-menu/tabs
+as the components most likely to have consumer breakage, since they're
+commonly used directly in app/feature code. Swept two ways: (1)
+`grep -rln 'from "@/components/ui/<component>"' src` for each of the 9
+targets plus `combobox`, across the ENTIRE `src` tree (not just
+`components/`); (2) a full-repo `grep -rn "asChild"` to catch any
+lingering boolean usage anywhere.
 
-- `src/components/custom-ui/custom-form-date-picker.tsx:60`,
-  `custom-form-date-range-picker.tsx:87`,
-  `custom-form-search-select.tsx:63`, `custom-search-select.tsx:55` —
-  `PopoverTrigger asChild` -> `render={<Button .../>}` with the
-  icon/text content moved to be the trigger's own children (Base UI merges
-  them onto the rendered element — verified against the stock `base-nova`
-  dialog/sheet close-button pattern, which uses the identical shape).
-  `custom-form-search-select.tsx` and `custom-search-select.tsx` also had
-  `className="w-(--radix-popover-trigger-width)! p-0"` on their
-  `PopoverContent` — renamed to `w-(--anchor-width)!` (the Radix CSS
-  custom property doesn't exist on Base UI's Positioner; without this fix
-  the dropdown width would have silently collapsed to content width
-  instead of matching the trigger).
-- `src/components/custom-ui/custom-tooltip.tsx:24` — its own
-  pass-through `asChild?: boolean` prop into `TooltipTrigger` converted to
-  a `render`/children ternary (`render` isn't a boolean toggle in Base UI).
-  Dead code (zero consumers anywhere in `src`), fixed only to keep `tsc`
-  green.
-- `src/components/ui/sidebar.tsx:529` — `TooltipTrigger asChild` ->
-  `render={button}`. `sidebar.tsx` itself is still fully Radix (out of
-  scope this pass, deferred to a future pass) and was touched ONLY at this
-  one call site because it consumes the now-migrated `Tooltip` wrapper —
-  same "fix the specific broken call site only" treatment pass-1 applied
-  to `alert-dialog.tsx`/`pagination.tsx`/`combobox.tsx`.
-- `src/components/ui/command.tsx:43-48` — `CommandDialog`'s prop type
-  inherited `Dialog.Root`'s widened `children?: ReactNode |
-  PayloadChildRenderFunction` (a new Base UI capability), which didn't
-  assign into `DialogContent`'s `children: ReactNode`-only slot. Narrowed
-  the local prop type to `Omit<..., "children"> & { children?:
-  React.ReactNode }`. `command.tsx` is cmdk (never a migration target, per
-  the hard rules) — only this one type annotation was touched, no cmdk
-  logic changed.
+Result: **zero live consumers** of any of the 9 migrated wrappers (or
+`combobox`) exist anywhere in `src` outside their own `ui/*.tsx` files —
+this app has not yet built out menus, a select-driven form beyond the two
+below, navigation, tabs, toggle groups, or a sidebar shell. The only
+`asChild` hits anywhere in `src` are inside
+`src/components/custom-ui/custom-tooltip.tsx` (its own pass-through prop,
+already converted to a `render`/children ternary in pass 2, dead code, zero
+consumers — not re-touched this pass).
 
-No other `consumer-props.md` tokens for this family (`onOpenAutoFocus`,
-`onCloseAutoFocus`, `onEscapeKeyDown`, `onPointerDownOutside`,
-`onInteractOutside`, `disableHoverableContent`, `openDelay`, `closeDelay`,
-`delayDuration`) appear anywhere in `src` outside the wrappers themselves —
-confirmed via grep, zero hits.
+Real consumer fixes needed (both for `select.tsx`'s `onValueChange`
+signature widening to `(value: string | null, eventDetails) => void`,
+since Base UI's `null` = "no value" has no Radix equivalent):
+
+- `src/components/custom-ui/custom-select.tsx:46` —
+  `onValueChange={onChange}` -> `onValueChange={(value) => onChange(value
+  ?? "")}` (component's own `onChange: (value: string) => void` contract
+  preserved by coercing `null` to `""`).
+- `src/components/custom-ui/custom-pagination.tsx:155` — same fix for its
+  row-size-picker `Select`, coercing into `handleLimitChange(limit: string)
+  => void`.
+- `src/components/custom-ui/custom-form-select.tsx:51` — checked, needed NO
+  change: its `onValueChange={field.onChange}` (react-hook-form
+  `Controller`) accepts `any`, so the widened type passes through without
+  error.
+
+No other `consumer-props.md` tokens for this family (`activationMode`,
+`rovingFocus`, `loop`, `position=`, `viewport=`, `delayDuration`,
+`skipDelayDuration`, `disableHoverableContent`) appear anywhere in `src`
+outside the wrappers themselves — confirmed via grep, zero hits.
 
 ## Left alone (explicitly out of scope)
 
-- Not Radix, never touch: `command.tsx` (cmdk, touched only for the one
-  forced type fix above), `drawer.tsx` (vaul), `sonner.tsx`,
-  `input-otp.tsx`, `calendar.tsx` (react-day-picker), `chart.tsx`
-  (recharts).
-- Radix-based, deferred to a future pass: everything still importing
-  `radix-ui` — see live count below.
-- `src/components/custom-ui/custom-alert-dialogue.tsx` — consumes
-  `ui/alert-dialog.tsx`'s Content/Header/Footer/Title/Description via
-  plain `Button` (not `AlertDialogAction`/`Cancel`), already compiled
-  clean with no changes needed. Also dead code (zero consumers).
-- `src/components/shared/alert-dialogue.tsx` /
-  `src/providers/AlertProvider.tsx` — consume `ui/dialog.tsx`, not
-  `ui/alert-dialog.tsx`; compiled clean with no changes needed (no
-  `asChild`, no changed-shape props in use).
+- Not Radix, never touch: `command.tsx` (cmdk), `drawer.tsx` (vaul),
+  `sonner.tsx`, `input-otp.tsx`, `calendar.tsx` (react-day-picker),
+  `chart.tsx` (recharts). Untouched this pass.
+- `src/components/custom-ui/custom-tooltip.tsx` — dead code, zero
+  consumers, already fixed in pass 2; not re-touched.
+- `src/components/ui/popover.tsx`, `src/components/ui/command.tsx` — the
+  task's framing suggested `combobox.tsx` was "built on top of" these; it
+  is not (verified: zero imports of either). Left untouched, noted in
+  `combobox.md`.
 
 ## Final verification
 
-- `pnpm typecheck` — clean (0 errors) after the fixes above; the one
-  pre-existing baseline error (`CustomErrorOrEmpty.tsx` missing asset)
-  reproduces identically to pass-1's baseline, confirmed not caused by
-  this pass.
+- `pnpm typecheck` — clean; the one pre-existing baseline error
+  (`CustomErrorOrEmpty.tsx` missing asset) reproduces identically to passes
+  1-2's baseline, confirmed not caused by this pass.
 - `pnpm lint` — clean (0 errors, 0 warnings).
-- `pnpm build` (Turbopack, Next 16.3.0) — succeeds: compiles, typechecks,
-  generates all routes, no errors.
+- `pnpm build` (Turbopack, Next 16.3.0) — succeeds: compiles, typechecks
+  (this pass's TypeScript run inside `next build` does NOT hit the
+  `CustomErrorOrEmpty.tsx` error, since that file sits outside the app's
+  actual route/import graph), generates all routes, no errors.
 
 ## Remaining radix-ui count
 
-Derived from disk, not tracked: `grep -rl "radix-ui\|@radix-ui" src/components/ui/*.tsx`
-after this pass returns exactly **9 files** still importing Radix directly:
-`breadcrumb.tsx`, `dropdown-menu.tsx`, `item.tsx`, `menubar.tsx`,
-`navigation-menu.tsx`, `select.tsx`, `sidebar.tsx`, `tabs.tsx`,
-`toggle-group.tsx`.
-
-Combined with pass 1 (15 migrated) and pass 2 (6 migrated), 21 of the 30
-Radix-based `ui/*.tsx` wrappers identified across both passes are now on
-Base UI. Trust the live grep over any narrative count in future passes.
+Derived from disk, not tracked: `grep -rl "radix-ui\|@radix-ui"
+src/components/ui/*.tsx` after this pass returns **zero files**. This was
+the last pass for the 25 stock `ui/*.tsx` wrappers — every one of them is
+now on Base UI. A full-repo sweep (`grep -rl "radix-ui\|@radix-ui" src`,
+not just `components/ui`) also returns **zero files**: the "5 custom-ui
+files with direct Radix imports" the task brief flagged as still pending a
+future pass were not found with any direct `radix-ui`/`@radix-ui` import at
+the time this pass ran — either they were already resolved as
+consumer-sweep side effects of passes 1-2 (several `custom-ui/*.tsx` files
+were touched for `asChild` -> `render` fixes in those passes, per their
+`project.md` notes), or the count in the task brief was stale. Either way,
+trust the live grep over any narrative count in future passes: `radix-ui`
+and `@radix-ui/react-*` remain installed in `package.json` (not removed —
+that's the user's call alongside the `components.json` style flip to
+`base-nova`), but nothing in `src` imports them anymore.
