@@ -5,7 +5,7 @@ import React, { useState } from "react";
 import { AlertType, FireProps } from "@/providers/AlertProvider";
 import { CircleCheckBig, CircleHelp, Loader, MessageCircleWarning, Trash2 } from "lucide-react";
 
-import { CustomButton } from "@/components/custom-ui/custom-button";
+import { CustomButton } from "@/components/custom/custom-button";
 import { DialogContent, DialogDescription, DialogFooter, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 
@@ -20,7 +20,7 @@ export const AlertDialogContent = (props: AlertDialogProps) => {
     const [ error, setError ] = useState<string | null>(null);
 
     return (
-        <DialogContent className="w-md max-w-lg min-w-[380px] space-y-4 p-4 lg:p-6">
+        <DialogContent className="w-md max-w-lg min-w-95 space-y-4 p-4 lg:p-6">
             <div>
                 { props.showIcon && (
                     <div className="mb-6 flex items-center justify-center">

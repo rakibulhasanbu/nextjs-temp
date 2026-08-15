@@ -9,7 +9,7 @@ import {
   FetchBaseQueryError,
   retry,
 } from "@reduxjs/toolkit/query/react"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/toast"
 
 export const API_TIMEOUT = 120_000 // 2 minutes
 export const API_BASE_URL = config.serverUrl
@@ -69,7 +69,7 @@ export const baseQueryWithReAuth: BaseQueryFn<
         result = await baseQuery(args, api, extraOptions)
       } else {
         await api.dispatch(logoutThunk())
-        toast.error("Session expired")
+        toast.add({title:"Session expired"})
       }
 
       // if (refreshResult.data) {

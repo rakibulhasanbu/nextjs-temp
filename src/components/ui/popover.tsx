@@ -47,19 +47,6 @@ function PopoverContent({
   )
 }
 
-// NOTE: Base UI's Popover has no Anchor part (see overlays.md / project migration
-// notes). Radix's PopoverAnchor let you visually anchor the popup to an element
-// other than the trigger; the Base UI equivalent is passing an `anchor` prop to
-// `PopoverPrimitive.Positioner` inside PopoverContent, which this wrapper does not
-// expose. Kept as an inert passthrough (renders children, does nothing else) only
-// so existing call sites that still import PopoverAnchor keep compiling. No
-// current consumer in this codebase uses it (verified via grep). FLAGGED, not
-// silently patched — if custom anchoring is needed later, add an `anchor` prop to
-// PopoverContent that forwards to Positioner instead of resurrecting this part.
-function PopoverAnchor({ ...props }: React.ComponentProps<"div">) {
-  return <div data-slot="popover-anchor" {...props} />
-}
-
 function PopoverHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -95,7 +82,6 @@ function PopoverDescription({
 
 export {
   Popover,
-  PopoverAnchor,
   PopoverContent,
   PopoverDescription,
   PopoverHeader,

@@ -1,113 +1,36 @@
-# Next.js Auth Template
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-A production-ready Next.js template with App Router, shadcn/ui, Tailwind CSS v4, Redux Toolkit, and a pre-integrated authentication system.
+## Getting Started
 
-## What is included
-
-- Next.js 16 + React 19 (App Router)
-- Tailwind CSS v4 + shadcn/ui component setup
-- Redux Toolkit + RTK Query + redux-persist
-- Server action based authentication helpers
-- Route protection and role-based redirects with `proxy.ts`
-- OTP email verification flow
-
-## Authentication system (implemented)
-
-This template already contains the core authentication infrastructure:
-
-- **Sign up** via server action (`/auth/signup`) and token cookie storage
-- **Sign in** via server action (`/auth/signin`) and token cookie storage
-- **Email verification (OTP)** via `/auth/verify-signup-token`
-- **Resend signup OTP** via `/auth/resend-signup-email/:email`
-- **Token refresh flow** on `401` responses via `/auth/refresh-token`
-- **Cookie + Redux state sync** (tokens and user data are initialized from cookies)
-- **Protected route logic** using `proxy.ts` and route groups in `src/routes`
-- **Role-based checks** for admin/super-admin route access
-
-Current auth pages:
-
-- `/auth/sign-up`
-- `/auth/sign-in`
-- `/auth/verify-email`
-- `/auth/forgot-password` (UI scaffold)
-
-## Environment variables
-
-Create a `.env.local` file in the project root:
+First, run the development server:
 
 ```bash
-NEXT_PUBLIC_SERVER_URL=https://your-api-base-url
-```
-
-`NEXT_PUBLIC_SERVER_URL` is used as the API base URL for auth and user endpoints.
-
-## Getting started
-
-```bash
-pnpm install
+npm run dev
+# or
+yarn dev
+# or
 pnpm dev
+# or
+bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## Scripts
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-- `pnpm dev` - run development server
-- `pnpm build` - build for production
-- `pnpm start` - run production server
-- `pnpm lint` - run ESLint
-- `pnpm typecheck` - run TypeScript checks
-- `pnpm format` - format TypeScript files
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-## Project structure
+## Learn More
 
-```text
-src/
-  app/
-    auth/
-      sign-in/
-      sign-up/
-      verify-email/
-      forgot-password/
-    globals.css
-    layout.tsx
-    page.tsx
-  components/
-    custom-ui/               # Reusable custom form and UI helpers
-    shared/                  # Shared cross-feature components
-    ui/                      # shadcn/ui components
-  config/
-    index.ts                 # App config (server URL, etc.)
-  features/
-    auth/
-      actions.ts             # Server actions (sign in/up, verify, logout, cookie ops)
-      api.ts                 # RTK Query auth/user endpoints
-      schemas.ts             # zod form validation
-      slice.ts               # Auth Redux state and thunks
-      types.ts               # User/auth types
-      components/            # Auth UI components and initializers
-      hooks/                 # Auth-related hooks
-  hooks/
-    use-time-counter.ts      # OTP resend timer helper
-  lib/
-    utils.ts                 # Utility helpers
-  providers/
-    index.tsx                # App providers composition
-    store-provider.tsx       # Redux provider + persistence gate
-    theme-provider.tsx       # Theme provider
-  redux/
-    api.ts                   # RTK Query base query + token refresh
-    hook.ts                  # Typed Redux hooks
-    store.ts                 # Store setup
-    storage.ts               # Persist storage
-    types.ts                 # Shared Redux/API types
-  routes/
-    index.ts                 # Route groups used by proxy guards
-  proxy.ts                   # Route auth/role protection middleware
-```
+To learn more about Next.js, take a look at the following resources:
 
-## Notes
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-- Access and refresh tokens are stored in secure, HTTP-only cookies.
-- The app reads cookie tokens on load and hydrates auth state into Redux.
-- You can customize route behavior in `src/routes/index.ts` and `src/proxy.ts`.
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

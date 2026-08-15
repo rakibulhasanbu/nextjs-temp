@@ -1,9 +1,8 @@
-import * as React from "react"
 import { NavigationMenu as NavigationMenuPrimitive } from "@base-ui/react/navigation-menu"
 import { cva } from "class-variance-authority"
-import { ChevronDownIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
+import { ChevronDownIcon } from "lucide-react"
 
 function NavigationMenu({
   align = "start",
@@ -72,10 +71,7 @@ function NavigationMenuTrigger({
       {...props}
     >
       {children}{" "}
-      <ChevronDownIcon
-        className="relative top-px ml-1 size-3 transition duration-300 group-data-popup-open/navigation-menu-trigger:rotate-180 group-data-open/navigation-menu-trigger:rotate-180"
-        aria-hidden="true"
-      />
+      <ChevronDownIcon className="relative top-px ml-1 size-3 transition duration-300 group-data-popup-open/navigation-menu-trigger:rotate-180 group-data-open/navigation-menu-trigger:rotate-180" aria-hidden="true" />
     </NavigationMenuPrimitive.Trigger>
   )
 }
@@ -141,16 +137,6 @@ function NavigationMenuLink({
   )
 }
 
-// NOTE: Base UI's NavigationMenu has no direct equivalent to Radix's
-// Indicator, which tracked the active trigger's position/width along the
-// List for an underline-style marker (see menus.md / navigation-menu.md
-// "Indicator -> Icon" caveat: different role, no List-tracking part
-// exists). The base-nova golden registry repurposes the real
-// `NavigationMenuPrimitive.Icon` part (verified present in
-// node_modules/@base-ui/react/navigation-menu/icon/) as a floating
-// popup-caret indicator instead -- functional, but it does not slide along
-// the trigger list like the old Radix Indicator did. Flagged, not patched;
-// see navigation-menu.md.
 function NavigationMenuIndicator({
   className,
   ...props

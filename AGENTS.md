@@ -1,47 +1,3 @@
-# Agent notes
-
-Compact repo guidance for OpenCode sessions. Skip anything already obvious from filenames.
-
-## Stack & tooling
-
-- **Package manager:** pnpm. Use `pnpm ...`; do not use npm/yarn.
-- **Next.js 16 + React 19**, App Router. Dev server uses Turbopack: `pnpm dev`.
-- **Tailwind CSS v4** — configured in CSS only (`src/app/globals.css`) via `@import "tailwindcss"`. There is no `tailwind.config.*`.
-- **shadcn/ui v4** (`components.json`, style `radix-nova`). Add components with `pnpm dlx shadcn@latest add <component>`.
-- **State:** Redux Toolkit + RTK Query + redux-persist. Typed hooks are in `src/redux/hook.ts`.
-
-## Required env
-
-Create `.env.local` in the project root:
-
-```bash
-NEXT_PUBLIC_SERVER_URL=https://your-api-base-url
-```
-
-No other env variables are wired in; `src/config/index.ts` only reads this one.
-
-## Developer commands
-
-| Command | What it does |
-|---------|---------------|
-| `pnpm install` | Install deps |
-| `pnpm dev` | Start Turbopack dev server on http://localhost:3000 |
-| `pnpm build` | Production build |
-| `pnpm start` | Run production server |
-| `pnpm lint` | ESLint (flat config in `eslint.config.mjs`) |
-| `pnpm typecheck` | `tsc --noEmit` |
-| `pnpm format` | Format `.ts`/`.tsx` with Prettier + import sorting + Tailwind class sorting |
-| `pnpm restart` | Nuclear reset: removes `node_modules`, `.next`, lockfile, reinstalls, and starts dev |
-
-There are **no tests** configured in this repo (no Jest/Vitest/Playwright).
-
-## Code style
-
-- Prettier: `printWidth: 120`, `semi: true`, double quotes, trailing commas `es5`, LF line endings.
-- Imports are auto-sorted by `@ianvs/prettier-plugin-sort-imports` in the order shown in `.prettierrc`.
-- Tailwind classes are auto-sorted by `prettier-plugin-tailwindcss`.
-- Prefer running `pnpm format` before committing; `pnpm lint` and `pnpm typecheck` are separate steps.
-
 ## Architecture
 
 - **App entry:** `src/app/layout.tsx` wraps children in `src/providers/index.tsx`.
@@ -81,3 +37,13 @@ src/features/<feature>/
 - `API_BASE_URL` comes from `NEXT_PUBLIC_SERVER_URL`; if it is missing at build/runtime, API calls will fail against `undefined`.
 - `pnpm restart` is destructive (deletes lockfile). Use it only when deps are suspect.
 - `tsconfig.tsbuildinfo` and `.next/` are gitignored but may need manual deletion if type-check or build behaves oddly.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
