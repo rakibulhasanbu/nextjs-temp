@@ -2,12 +2,12 @@ import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthInitiatorFromCookies } from "@/features/auth/components/auth-initiator-from-cookies";
 import { AlertProvider } from "@/providers/AlertProvider";
-import { QueryProvider } from "@/providers/query-provider";
+import { StoreProvider } from "@/providers/store-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
 
 export const Providers = ({ children }: { children: React.ReactNode }) => {
     return (
-        <QueryProvider>
+        <StoreProvider>
             <ThemeProvider>
                 <AuthInitiatorFromCookies>
                     <AlertProvider>
@@ -18,6 +18,6 @@ export const Providers = ({ children }: { children: React.ReactNode }) => {
                     </AlertProvider>
                 </AuthInitiatorFromCookies>
             </ThemeProvider>
-        </QueryProvider>
+        </StoreProvider>
     )
 };

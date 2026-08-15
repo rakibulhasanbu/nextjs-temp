@@ -1,54 +1,66 @@
-"use client"
-
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-
 import { User, UserRole } from "@/features/auth/types"
-import { apiFetch } from "@/lib/api-client"
-import { METHOD, PaginatedResponse, QueryParams, ResponseObject } from "@/lib/api-types"
+import { api } from "@/redux/api"
+import { METHOD, PaginatedResponse, QueryParams, ResponseObject, TagType } from "@/redux/types"
 
-export const useVerifySignupOTPMutation = () =>
-  useMutation({
-    mutationFn: (payload: { token: number }) =>
-      apiFetch<{ user: User; accessToken: string }>("/auth/verify-signup-token", {
+export const authApi = api.injectEndpoints({
+  endpoints: (builder) => ({
+    verifySignupOTP: builder.mutation<{ user: User; accessToken: string }, { token: number }>({
+      query: (payload) => ({
+        url: "/auth/verify-signup-token",
         method: METHOD.POST,
         body: payload,
       }),
-  })
+    }),
 
-export const useReSendVerificationSignupOTPMutation = () =>
-  useMutation({
-    mutationFn: (payload: { email: string }) =>
-      apiFetch<void>(`/auth/resend-signup-email/${payload.email}`, {
+    reSendVerificationSignupOTP: builder.mutation<void, { email: string }>({
+      query: (payload) => ({
+        url: `/auth/resend-signup-email/${payload.email}`,
         method: METHOD.POST,
         body: payload,
       }),
-  })
+    }),
 
-export const useGetUserQuery = () =>
-  useQuery({
-    queryKey: ["user", "me"],
-    queryFn: () => apiFetch<ResponseObject<User>>("/user/me"),
-  })
+    getUser: builder.query<ResponseObject<User>, void>({
+      query: () => ({
+        url: "/user/me",
+        method: METHOD.GET,
+      }),
+      providesTags: [TagType.User],
+    }),
 
-export const useGetUsersQuery = (params: QueryParams) =>
-  useQuery({
-    queryKey: ["users", params],
-    queryFn: () => apiFetch<PaginatedResponse<User>>("/user/", { params }),
-  })
+    getUsers: builder.query<PaginatedResponse<User>, QueryParams>({
+      query: (params) => ({
+        url: "/user/",
+        method: METHOD.GET,
+        params,
+      }),
+      providesTags: [TagType.User],
+    }),
 
-export const useUpdateUserMutation = () => {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: ({ id, role }: { id: string; role: UserRole }) =>
-      apiFetch<void>(`/user/${id}`, { method: METHOD.PATCH, body: { role } }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["users"] }),
-  })
-}
+    updateUser: builder.mutation<void, { id: string; role: UserRole }>({
+      query: ({ id, role }) => ({
+        url: `/user/${id}`,
+        method: METHOD.PATCH,
+        body: { role },
+      }),
+      invalidatesTags: [TagType.User],
+    }),
 
-export const useDeleteUserMutation = () => {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: ({ id }: { id: string }) => apiFetch<void>(`/user/${id}`, { method: METHOD.DELETE }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["users"] }),
-  })
-}
+    deleteUser: builder.mutation<void, { id: string }>({
+      query: ({ id }) => ({
+        url: `/user/${id}`,
+        method: METHOD.DELETE,
+      }),
+      invalidatesTags: [TagType.User],
+    }),
+  }),
+})
+
+export const {
+  useVerifySignupOTPMutation,
+  useReSendVerificationSignupOTPMutation,
+  useGetUserQuery,
+  useGetUsersQuery,
+  useUpdateUserMutation,
+  useDeleteUserMutation,
+} = authApi

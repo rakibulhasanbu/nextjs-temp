@@ -41,7 +41,7 @@ const OTPVerifyForm = () => {
 
     const [ resendSuccess, setResendSuccess ] = useState(false);
     const [ isPending, startTransition ] = useTransition();
-    const { mutateAsync: reSendVerificationSignupOTP, isPending: isResendLoading } = useReSendVerificationSignupOTPMutation();
+    const [ reSendVerificationSignupOTP, { isLoading: isResendLoading } ] = useReSendVerificationSignupOTPMutation();
     const onSuccess = useAuthSuccess();
 
     const form = useForm<z.infer<typeof FormSchema>>({
@@ -89,6 +89,7 @@ const OTPVerifyForm = () => {
         setResendSuccess(false);
 
         await reSendVerificationSignupOTP({ email })
+            .unwrap()
             .then(() => {
                 toast.success("OTP code has been sent.");
                 setResendSuccess(true);
