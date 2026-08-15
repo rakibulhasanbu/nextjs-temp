@@ -6,10 +6,9 @@ import { useState, useTransition } from "react";
 import { CustomOTPFormInput } from "@/components/custom-ui/custom-OTP-form-input";
 import { verifyEmailAction } from "@/features/auth/actions";
 import { useReSendVerificationSignupOTPMutation } from "@/features/auth/api";
+import { useAuth } from "@/features/auth/context";
 import { useAuthSuccess } from "@/features/auth/hooks/use-auth-utils";
-import { logoutThunkWithoutReload } from "@/features/auth/slice";
 import { UserRole } from "@/features/auth/types";
-import { useAppDispatch, useAppSelector } from "@/redux/hook";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { Mail } from "lucide-react";
@@ -22,7 +21,7 @@ import { CustomButton } from "@/components/custom-ui/custom-button";
 import { Logo } from "@/components/shared/logo";
 import { FieldGroup } from "@/components/ui/field";
 import { useTimeCounter } from "@/hooks/use-time-counter";
-import { ErrorResponse } from "@/redux/types";
+import { ApiError } from "@/lib/api-client";
 
 const FormSchema = z.object({
     otp: z.string().min(4, {
@@ -32,18 +31,17 @@ const FormSchema = z.object({
 
 const OTPVerifyForm = () => {
     const router = useRouter();
-    const user = useAppSelector((state) => state?.auth?.user);
+    const { user, logout } = useAuth();
     const email = user?.email;
     const isAdmin = user?.role === UserRole.ADMIN;
     const redirectPath = isAdmin ? "/overview" : "/onboarding";
 
-    const dispatch = useAppDispatch();
     const [ isOtpSent, setIsOtpSent ] = useState(false);
     const { countingTime, isEnd, reset } = useTimeCounter(30, isOtpSent);
 
     const [ resendSuccess, setResendSuccess ] = useState(false);
     const [ isPending, startTransition ] = useTransition();
-    const [ reSendVerificationSignupOTP, { isLoading: isResendLoading } ] = useReSendVerificationSignupOTPMutation();
+    const { mutateAsync: reSendVerificationSignupOTP, isPending: isResendLoading } = useReSendVerificationSignupOTPMutation();
     const onSuccess = useAuthSuccess();
 
     const form = useForm<z.infer<typeof FormSchema>>({
@@ -90,8 +88,7 @@ const OTPVerifyForm = () => {
         form.clearErrors("otp");
         setResendSuccess(false);
 
-        await reSendVerificationSignupOTP({ email: user.email })
-            .unwrap()
+        await reSendVerificationSignupOTP({ email })
             .then(() => {
                 toast.success("OTP code has been sent.");
                 setResendSuccess(true);
@@ -100,7 +97,7 @@ const OTPVerifyForm = () => {
                 // Hide success message after 5 seconds
                 setTimeout(() => setResendSuccess(false), 5000);
             })
-            .catch((err: ErrorResponse) => {
+            .catch((err: ApiError) => {
                 toast.error(err.message || "OTP code has not been sent.");
                 setResendSuccess(false);
                 setIsOtpSent(false);
@@ -108,7 +105,7 @@ const OTPVerifyForm = () => {
     };
 
     const handleBackToSignIn = () => {
-        dispatch(logoutThunkWithoutReload());
+        logout();
         setTimeout(() => {
             router.replace("/auth/sign-in");
         }, 100);

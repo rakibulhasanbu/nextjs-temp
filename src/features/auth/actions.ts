@@ -185,6 +185,7 @@ export const logoutAction = async () => {
   const cookieStore = await cookies()
   cookieStore.delete({ name: "accessToken", path: "/" })
   cookieStore.delete({ name: "refreshToken", path: "/" })
+  cookieStore.delete({ name: "user", path: "/" })
 }
 
 const setTokensToCookies = async (accessToken: string, refreshToken: string) => {
@@ -198,7 +199,7 @@ const setTokensToCookies = async (accessToken: string, refreshToken: string) => 
 
   cookieStore.set("accessToken", accessToken, {
     ...base,
-    maxAge: 60 * 60 * 24 * 90, // 90 days
+    maxAge: 60 * 60, // 1 hour — short-lived, refreshed via refreshToken
   })
 
   cookieStore.set("refreshToken", refreshToken, {

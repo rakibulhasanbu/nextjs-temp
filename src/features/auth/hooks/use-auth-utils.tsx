@@ -1,14 +1,13 @@
 import { useRouter, useSearchParams } from "next/navigation";
 
-import { setTokens, setUser } from "@/features/auth/slice";
-import { useAppDispatch } from "@/redux/hook";
+import { useAuth } from "@/features/auth/context";
 import { User } from "@/features/auth/types";
 
 export const useAuthSuccess = () => {
     const router = useRouter();
     const searchParams = useSearchParams();
     const callbackUrl = searchParams.get("callbackUrl") || "/";
-    const dispatch = useAppDispatch();
+    const { setUser, setTokens } = useAuth();
 
     const onSuccess = ({
         accessToken,
@@ -21,10 +20,10 @@ export const useAuthSuccess = () => {
         user: User | null;
         path?: string;
     }) => {
-        dispatch(setTokens({ accessToken, refreshToken }));
+        setTokens({ accessToken, refreshToken });
 
         if (user) {
-            dispatch(setUser(user));
+            setUser(user);
         }
 
         setTimeout(() => {

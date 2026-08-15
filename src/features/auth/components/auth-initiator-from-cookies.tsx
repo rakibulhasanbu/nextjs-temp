@@ -1,7 +1,7 @@
 import React from "react";
 import { cookies } from "next/headers";
 
-import { TokenInitiatorInStore } from "@/features/auth/components/token-initiator-in-store";
+import { AuthProvider } from "@/features/auth/context";
 import { User } from "@/features/auth/types";
 
 type Props = {
@@ -15,12 +15,12 @@ export const AuthInitiatorFromCookies = async ({ children }: Props) => {
     const user = JSON.parse(cookieStore.get("user")?.value || "{}") as User;
 
     return (
-        <TokenInitiatorInStore
-            accessToken={ accessToken }
-            refreshToken={ refreshToken }
-            user={ user }
+        <AuthProvider
+            initialAccessToken={ accessToken }
+            initialRefreshToken={ refreshToken }
+            initialUser={ accessToken && refreshToken ? user : undefined }
         >
             { children }
-        </TokenInitiatorInStore>
+        </AuthProvider>
     );
 };

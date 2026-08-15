@@ -50,6 +50,11 @@ function redirectTo(path: string, req: NextRequest): NextResponse {
   return url.pathname === req.nextUrl.pathname ? NextResponse.next() : NextResponse.redirect(url)
 }
 
+// NOTE: this proxy only redirects for UX — it trusts cookie *presence* and the
+// unsigned `user` JSON cookie for role/verification, neither of which it can
+// cryptographically verify. It is NOT an authorization boundary. Every
+// privileged backend endpoint MUST independently verify the JWT and
+// re-derive role/verification server-side; never rely on this gate alone.
 const checkAuth = (req: NextRequest) => {
   const accessToken = req.cookies.get("accessToken")?.value
   const refreshToken = req.cookies.get("refreshToken")?.value
