@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 
 import { Eye, EyeOff } from "lucide-react";
@@ -22,7 +24,7 @@ type TCustomFormInput<T extends FieldValues> = {
   showAsterisk?: boolean;
 };
 
-export const CustomFormInput = <T extends FieldValues> ({
+export const CustomFormInput = <T extends FieldValues>({
   label,
   disabled,
   name,
@@ -37,48 +39,50 @@ export const CustomFormInput = <T extends FieldValues> ({
   readOnly,
   showAsterisk = true,
 }: TCustomFormInput<T>) => {
-  const [ inputVisible, setInputVisible ] = useState<"masked" | "visible">("masked");
+  const [inputVisible, setInputVisible] = useState<"masked" | "visible">("masked");
 
   return (
     <Controller
-      name={ name }
-      control={ control }
-      disabled={ disabled }
-      render={ ({ field, fieldState }) => (
-        <Field data-invalid={ fieldState.invalid }>
-          { label && <FieldLabel htmlFor={ name }>{ label } { showAsterisk ? required && <span className="text-red-500">*</span> : null }</FieldLabel> }
+      name={name}
+      control={control}
+      disabled={disabled}
+      render={({ field, fieldState }) => (
+        <Field data-invalid={fieldState.invalid}>
+          {label && (
+            <FieldLabel htmlFor={name}>
+              {label} {showAsterisk ? required && <span className="text-red-500">*</span> : null}
+            </FieldLabel>
+          )}
           <InputGroup>
             <InputGroupInput
-              { ...field }
-              id={ name }
-              type={ type === "password" ? (inputVisible === "visible" ? "text" : "password") : type || "text" }
-              aria-invalid={ fieldState.invalid }
-              placeholder={ placeholder }
-              autoComplete={ autoComplete }
-              readOnly={ readOnly }
-              min={ min }
-              max={ max }
+              {...field}
+              id={name}
+              type={type === "password" ? (inputVisible === "visible" ? "text" : "password") : type || "text"}
+              aria-invalid={fieldState.invalid}
+              placeholder={placeholder}
+              autoComplete={autoComplete}
+              readOnly={readOnly}
+              min={min}
+              max={max}
             />
-            { type === "password" && (
+            {type === "password" && (
               <InputGroupAddon align="inline-end">
                 <InputGroupButton
                   type="button"
                   className="cursor-pointer"
-                  title={ inputVisible === "visible" ? "Hide password" : "Show password" }
-                  aria-label={ inputVisible === "visible" ? "Hide password" : "Show password" }
-                  onClick={ () => setInputVisible((prev) => prev === "masked" ? "visible" : "masked") }
+                  title={inputVisible === "visible" ? "Hide password" : "Show password"}
+                  aria-label={inputVisible === "visible" ? "Hide password" : "Show password"}
+                  onClick={() => setInputVisible((prev) => (prev === "masked" ? "visible" : "masked"))}
                 >
-                  { inputVisible === "visible" ? <Eye /> : <EyeOff /> }
+                  {inputVisible === "visible" ? <Eye /> : <EyeOff />}
                 </InputGroupButton>
               </InputGroupAddon>
-            ) }
+            )}
           </InputGroup>
-          { description && <FieldDescription>{ description }</FieldDescription> }
-          { fieldState.invalid && (
-            <FieldError errors={ [ fieldState.error ] } />
-          ) }
+          {description && <FieldDescription>{description}</FieldDescription>}
+          {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
         </Field>
-      ) }
+      )}
     />
   );
 };

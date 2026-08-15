@@ -1,7 +1,9 @@
-import { Switch } from "@/components/ui/switch";
+"use client";
+
 import { Control, Controller, FieldValues, Path } from "react-hook-form";
 
 import { Field, FieldContent, FieldDescription, FieldError, FieldLabel } from "@/components/ui/field";
+import { Switch } from "@/components/ui/switch";
 
 type TCustomFormSwitch<T extends FieldValues> = {
   name: Path<T>;
@@ -13,7 +15,7 @@ type TCustomFormSwitch<T extends FieldValues> = {
   showAsterisk?: boolean;
 };
 
-export const CustomFormSwitch = <T extends FieldValues> ({
+export const CustomFormSwitch = <T extends FieldValues>({
   name,
   control,
   label,
@@ -24,28 +26,31 @@ export const CustomFormSwitch = <T extends FieldValues> ({
 }: TCustomFormSwitch<T>) => {
   return (
     <Controller
-      name={ name }
-      control={ control }
-      disabled={ disabled }
-      render={ ({ field, fieldState }) => {
-
+      name={name}
+      control={control}
+      disabled={disabled}
+      render={({ field, fieldState }) => {
         return (
-          <Field orientation={ "horizontal" } data-invalid={ fieldState.invalid }>
+          <Field orientation={"horizontal"} data-invalid={fieldState.invalid}>
             <FieldContent>
-              { label && (<FieldLabel htmlFor={ name }>{ label } { showAsterisk ? required && <span className="text-red-500">*</span> : null } </FieldLabel>) }
-              { description && (<FieldDescription> { description } </FieldDescription>) }
-              { fieldState.invalid && (<FieldError errors={ [ fieldState.error ] } />) }
+              {label && (
+                <FieldLabel htmlFor={name}>
+                  {label} {showAsterisk ? required && <span className="text-red-500">*</span> : null}{" "}
+                </FieldLabel>
+              )}
+              {description && <FieldDescription> {description} </FieldDescription>}
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </FieldContent>
             <Switch
-              id={ name }
-              name={ field.name }
-              checked={ field.value }
-              onCheckedChange={ field.onChange }
-              aria-invalid={ fieldState.invalid }
+              id={name}
+              name={field.name}
+              checked={field.value}
+              onCheckedChange={field.onChange}
+              aria-invalid={fieldState.invalid}
             />
           </Field>
         );
-      } }
+      }}
     />
   );
 };
