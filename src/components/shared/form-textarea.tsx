@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
 
-type TCustomFormTextarea<T extends FieldValues> = {
+type TFormTextarea<T extends FieldValues> = {
   name: Path<T>;
   control: Control<T>;
   label?: string;
@@ -18,7 +18,7 @@ type TCustomFormTextarea<T extends FieldValues> = {
   disabled?: boolean;
 };
 
-export const CustomFormTextarea = <T extends FieldValues>({
+export const FormTextarea = <T extends FieldValues>({
   name,
   control,
   label,
@@ -28,7 +28,7 @@ export const CustomFormTextarea = <T extends FieldValues>({
   required,
   showAsterisk = true,
   disabled,
-}: TCustomFormTextarea<T>) => {
+}: TFormTextarea<T>) => {
   return (
     <Controller
       name={name}

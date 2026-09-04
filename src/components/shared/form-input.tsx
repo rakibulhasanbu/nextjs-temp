@@ -8,7 +8,7 @@ import { Control, Controller, FieldValues, Path } from "react-hook-form";
 import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui/field";
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "@/components/ui/input-group";
 
-type TCustomFormInput<T extends FieldValues> = {
+type TFormInput<T extends FieldValues> = {
   name: Path<T>;
   label?: string;
   placeholder: string;
@@ -24,7 +24,7 @@ type TCustomFormInput<T extends FieldValues> = {
   showAsterisk?: boolean;
 };
 
-export const CustomFormInput = <T extends FieldValues>({
+export const FormInput = <T extends FieldValues>({
   label,
   disabled,
   name,
@@ -38,7 +38,7 @@ export const CustomFormInput = <T extends FieldValues>({
   autoComplete,
   readOnly,
   showAsterisk = true,
-}: TCustomFormInput<T>) => {
+}: TFormInput<T>) => {
   const [inputVisible, setInputVisible] = useState<"masked" | "visible">("masked");
 
   return (

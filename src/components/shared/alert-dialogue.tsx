@@ -2,11 +2,12 @@
 
 import React, { useState } from "react";
 
-import { CircleCheckBig, CircleHelp, Loader, MessageCircleWarning, Trash2 } from "lucide-react";
+import { CircleCheckBig, CircleHelp, MessageCircleWarning, Trash2 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { DialogContent, DialogDescription, DialogFooter, DialogTitle } from "@/components/ui/dialog";
-import { CustomButton } from "@/components/custom/custom-button";
+import { Spinner } from "@/components/ui/spinner";
 import { AlertType, FireProps } from "@/components/providers/alert-provider";
 
 type AlertDialogProps = Omit<Required<FireProps>, "title" | "text"> & {
@@ -50,7 +51,7 @@ export const AlertDialogContent = (props: AlertDialogProps) => {
       </div>
       <DialogFooter className="my-0 grid grid-cols-2 gap-4">
         {props.showCancelButton && (
-          <CustomButton
+          <Button
             variant={props.cancelButtonOptions.variant}
             onClick={async () => {
               await props.onCancel();
@@ -60,9 +61,9 @@ export const AlertDialogContent = (props: AlertDialogProps) => {
             className="cursor-pointer"
           >
             {props.cancelButtonOptions.text}
-          </CustomButton>
+          </Button>
         )}
-        <CustomButton
+        <Button
           variant={props.confirmButtonOptions.variant}
           onClick={async () => {
             setLoading(true);
@@ -79,9 +80,9 @@ export const AlertDialogContent = (props: AlertDialogProps) => {
           disabled={loading}
           className="cursor-pointer"
         >
-          {loading && <Loader className="animate-spin" size={20} />}
+          {loading && <Spinner className="size-5" />}
           {props.confirmButtonOptions.text}
-        </CustomButton>
+        </Button>
       </DialogFooter>
     </DialogContent>
   );

@@ -5,7 +5,7 @@ import { Control, Controller, FieldValues, Path } from "react-hook-form";
 import { Field, FieldContent, FieldDescription, FieldError, FieldLabel } from "@/components/ui/field";
 import { Switch } from "@/components/ui/switch";
 
-type TCustomFormSwitch<T extends FieldValues> = {
+type TFormSwitch<T extends FieldValues> = {
   name: Path<T>;
   control: Control<T>;
   label?: string;
@@ -15,7 +15,7 @@ type TCustomFormSwitch<T extends FieldValues> = {
   showAsterisk?: boolean;
 };
 
-export const CustomFormSwitch = <T extends FieldValues>({
+export const FormSwitch = <T extends FieldValues>({
   name,
   control,
   label,
@@ -23,7 +23,7 @@ export const CustomFormSwitch = <T extends FieldValues>({
   disabled,
   required,
   showAsterisk = true,
-}: TCustomFormSwitch<T>) => {
+}: TFormSwitch<T>) => {
   return (
     <Controller
       name={name}

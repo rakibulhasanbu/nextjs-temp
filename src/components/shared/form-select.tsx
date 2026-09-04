@@ -5,7 +5,7 @@ import { Control, Controller, FieldValues, Path } from "react-hook-form";
 import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui/field";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-type TCustomFormSelect<T extends FieldValues> = {
+type TFormSelect<T extends FieldValues> = {
   name: Path<T>;
   control: Control<T>;
   options: {
@@ -20,7 +20,7 @@ type TCustomFormSelect<T extends FieldValues> = {
   showAsterisk?: boolean;
 };
 
-export const CustomFormSelect = <T extends FieldValues>({
+export const FormSelect = <T extends FieldValues>({
   name,
   control,
   options,
@@ -30,7 +30,7 @@ export const CustomFormSelect = <T extends FieldValues>({
   disabled,
   required,
   showAsterisk = true,
-}: TCustomFormSelect<T>) => {
+}: TFormSelect<T>) => {
   return (
     <Controller
       name={name}
