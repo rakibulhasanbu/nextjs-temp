@@ -1,6 +1,7 @@
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
+import { Text } from "@/components/ui/text";
 
 type DataTableHeaderProps = {
   title?: string;
@@ -17,19 +18,38 @@ type DataTableHeaderProps = {
  * ```tsx
  * <DataTableHeader title="Users" description="Manage your team members">
  *   <DataTableSearch />
- *   <DataTableFilter columnId="status" options={statusOptions} />
+ *   <DataTableFilter columnId="status" title="Status" options={statusOptions} />
  *   <DataTableViewOptions />
  * </DataTableHeader>
  * <DataTable />
  * ```
  */
-export const DataTableHeader = ({ title, description, children, className }: DataTableHeaderProps) => {
+export const DataTableHeader = ({
+  title,
+  description,
+  children,
+  className,
+}: DataTableHeaderProps) => {
   return (
-    <div className={cn("flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between", className)}>
+    <div
+      className={cn(
+        "flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between",
+        !title && !description && "sm:justify-end",
+        className
+      )}
+    >
       {(title || description) && (
         <div className="space-y-1">
-          {title && <h2 className="text-lg font-semibold">{title}</h2>}
-          {description && <p className="text-sm text-muted-foreground">{description}</p>}
+          {title && (
+            <Text variant="h4" render={<h2 />} className="text-lg sm:text-lg">
+              {title}
+            </Text>
+          )}
+          {description && (
+            <Text variant="small" tone="muted" weight="normal">
+              {description}
+            </Text>
+          )}
         </div>
       )}
       {children && <div className="flex flex-wrap items-center gap-2">{children}</div>}

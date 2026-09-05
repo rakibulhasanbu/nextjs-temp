@@ -1,6 +1,7 @@
 "use client";
 
 import { InboxIcon } from "lucide-react";
+import type { RowData } from "@tanstack/react-table";
 
 import { cn } from "@/lib/utils";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -9,7 +10,7 @@ import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/
 import { useDataTableContext } from "@/components/table/data-table-context";
 import { DataTablePagination } from "@/components/table/data-table-pagination";
 
-type DataTableProps = {
+type DataTableProps<TData extends RowData> = {
   isLoading?: boolean;
   emptyTitle?: string;
   emptyDescription?: string;
@@ -17,17 +18,24 @@ type DataTableProps = {
   className?: string;
   /** Set to false to render the table without the built-in pagination footer. */
   showPagination?: boolean;
+  /**
+   * Makes each row clickable (e.g. to open a detail dialog). Interactive
+   * controls inside a row — like the selection checkbox — must call
+   * `event.stopPropagation()` so they don't also trigger this.
+   */
+  onRowClick?: (row: TData) => void;
 };
 
-export const DataTable = ({
+export const DataTable = <TData extends RowData = RowData>({
   isLoading,
   emptyTitle = "No results",
   emptyDescription = "Try adjusting your search or filters.",
   pageSizeOptions,
   className,
   showPagination = true,
-}: DataTableProps) => {
-  const table = useDataTableContext();
+  onRowClick,
+}: DataTableProps<TData>) => {
+  const table = useDataTableContext<TData>();
   const rows = table.getRowModel().rows;
   const columnCount = table.getAllLeafColumns().length;
 
@@ -59,7 +67,11 @@ export const DataTable = ({
               ))
             ) : rows.length > 0 ? (
               rows.map((row) => (
-                <TableRow key={row.id}>
+                <TableRow
+                  key={row.id}
+                  onClick={onRowClick ? () => onRowClick(row.original) : undefined}
+                  className={cn(onRowClick && "cursor-pointer")}
+                >
                   {row.getAllCells().map((cell) => (
                     <TableCell key={cell.id}>
                       <table.FlexRender cell={cell} />

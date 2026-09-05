@@ -25,7 +25,7 @@ function resolveUpdater<T>(updater: Updater<T>, current: T): T {
  * the reserved keys (`page`, `perPage`, `sort`, the search key) is treated
  * as a column filter keyed by column id, value(s) comma-separated.
  */
-export const useDataTableUrlState = ({ searchParamKey = "search", defaultPageSize = 10 }: UseDataTableUrlStateOptions = {}) => {
+export const useDataTableUrlState = ({ searchParamKey = "search", defaultPageSize = 20 }: UseDataTableUrlStateOptions = {}) => {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -62,7 +62,7 @@ export const useDataTableUrlState = ({ searchParamKey = "search", defaultPageSiz
       .filter((value): value is { id: string; desc: boolean } => value !== null);
   }, [searchParams]);
 
-  const globalFilter = searchParams.get(searchParamKey) ?? "";
+  const searchTerm = searchParams.get(searchParamKey) ?? "";
 
   const columnFilters = useMemo<ColumnFiltersState>(() => {
     const reserved = new Set([PAGE_KEY, PER_PAGE_KEY, SORT_KEY, searchParamKey]);
@@ -104,16 +104,16 @@ export const useDataTableUrlState = ({ searchParamKey = "search", defaultPageSiz
     [sorting, pushParams]
   );
 
-  const setGlobalFilter = useCallback(
+  const setSearchTerm = useCallback(
     (updater: Updater<string>) => {
-      const next = resolveUpdater(updater, globalFilter);
+      const next = resolveUpdater(updater, searchTerm);
       pushParams((params) => {
         if (next) params.set(searchParamKey, next);
         else params.delete(searchParamKey);
         params.delete(PAGE_KEY);
       });
     },
-    [globalFilter, pushParams, searchParamKey]
+    [searchTerm, pushParams, searchParamKey]
   );
 
   const setColumnFilters = useCallback(
@@ -136,8 +136,8 @@ export const useDataTableUrlState = ({ searchParamKey = "search", defaultPageSiz
     setPagination,
     sorting,
     setSorting,
-    globalFilter,
-    setGlobalFilter,
+    searchTerm,
+    setSearchTerm,
     columnFilters,
     setColumnFilters,
   };

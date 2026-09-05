@@ -4,11 +4,13 @@ import {
   createFilteredRowModel,
   createPaginatedRowModel,
   createSortedRowModel,
+  filterFn_arrHas,
   filterFn_arrIncludesSome,
   filterFn_equalsString,
   filterFn_includesString,
   globalFilteringFeature,
   rowPaginationFeature,
+  rowSelectionFeature,
   rowSortingFeature,
   sortFn_alphanumeric,
   sortFn_basic,
@@ -38,11 +40,16 @@ export const dataTableFeatures = tableFeatures({
   filterFns: {
     includesString: filterFn_includesString,
     equalsString: filterFn_equalsString,
+    // Scalar column value against multiple selected options, e.g. a
+    // multi-select "status" filter. Use `arrIncludesSome` instead when the
+    // *cell* value itself is an array (e.g. a tags column).
+    arrHas: filterFn_arrHas,
     arrIncludesSome: filterFn_arrIncludesSome,
   },
   rowPaginationFeature,
   paginatedRowModel: createPaginatedRowModel(),
   columnVisibilityFeature,
+  rowSelectionFeature,
 });
 
 export type DataTableFeatures = typeof dataTableFeatures;

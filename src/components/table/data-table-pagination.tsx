@@ -4,6 +4,7 @@ import { ChevronLeftIcon, ChevronRightIcon, ChevronsLeftIcon, ChevronsRightIcon 
 
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Text } from "@/components/ui/text";
 import { useDataTableContext } from "@/components/table/data-table-context";
 
 type DataTablePaginationProps = {
@@ -36,9 +37,9 @@ export const DataTablePagination = ({ pageSizeOptions = [10, 20, 30, 50], classN
       </div>
 
       <div className="flex items-center gap-4">
-        <p className="text-sm text-muted-foreground">
+        <Text variant="small" tone="muted" weight="normal">
           {rowCount === 0 ? "0 results" : `Page ${pageIndex + 1} of ${Math.max(pageCount, 1)} · ${rowCount} results`}
-        </p>
+        </Text>
         <div className="flex items-center gap-1">
           <Button
             variant="outline"

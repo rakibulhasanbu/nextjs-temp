@@ -5,12 +5,13 @@ import { PlusCircleIcon, XIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { useDataTableContext } from "@/components/table/data-table-context";
 import type { DataTableFilterOption } from "@/components/table/types";
 
-type DataTableFilterProps = {
+type DataTableFacetedFilterProps = {
   /** Id of the column to filter (must match the accessor/column id). */
   columnId: string;
   title: string;
@@ -18,26 +19,41 @@ type DataTableFilterProps = {
   className?: string;
 };
 
+/** Column filter value is normalized to an array regardless of how it was
+ * last written (a bare string can come back from URL deserialization when
+ * exactly one option is selected). */
+const toValues = (raw: unknown): string[] => {
+  if (Array.isArray(raw)) return raw as string[];
+  if (typeof raw === "string" && raw) return [raw];
+  return [];
+};
+
 /**
- * A single-select filter bound to a column and synced to the URL, e.g.
- * `<DataTableFilter columnId="status" title="Status" options={statusOptions} />`.
- * Mirrors `DataTableFacetedFilter`'s trigger/popover design, but only one
- * option can be active at a time (selecting an option replaces the value,
- * re-selecting the active option clears it). Give the target column
- * `filterFn: "equalsString"` (registered in `features.ts`) so the match is
- * exact rather than substring-based.
+ * A multi-select filter bound to a column and synced to the URL, e.g.
+ * `<DataTableFacetedFilter columnId="status" title="Status" options={statusOptions} />`.
+ * Give the target column `filterFn: "arrHas"` (registered in `features.ts`)
+ * so a row matches when its scalar value is any of the selected options.
+ * For "does this array cell contain any of the selected values" filters
+ * (e.g. a tags column), use `filterFn: "arrIncludesSome"` instead.
  */
-export const DataTableFilter = ({ columnId, title, options, className }: DataTableFilterProps) => {
+export const DataTableFacetedFilter = ({
+  columnId,
+  title,
+  options,
+  className,
+}: DataTableFacetedFilterProps) => {
   const table = useDataTableContext();
   const column = table.getColumn(columnId);
 
   if (!column) return null;
 
-  const selected = column.getFilterValue() as string | undefined;
-  const selectedOption = options.find((option) => option.value === selected);
+  const selected = new Set(toValues(column.getFilterValue()));
 
   const toggle = (value: string) => {
-    column.setFilterValue(value === selected ? undefined : value);
+    const next = new Set(selected);
+    if (next.has(value)) next.delete(value);
+    else next.add(value);
+    column.setFilterValue(next.size > 0 ? Array.from(next) : undefined);
   };
 
   return (
@@ -47,11 +63,11 @@ export const DataTableFilter = ({ columnId, title, options, className }: DataTab
           <Button variant="outline" size="sm" className={cn("border-dashed", className)}>
             <PlusCircleIcon data-icon="inline-start" />
             {title}
-            {selectedOption && (
+            {selected.size > 0 && (
               <>
                 <Separator orientation="vertical" className="mx-1 h-4" />
                 <Badge variant="secondary" className="gap-1 rounded-sm px-1 font-normal">
-                  {selectedOption.label}
+                  {selected.size}
                   <span
                     role="button"
                     tabIndex={-1}
@@ -73,28 +89,32 @@ export const DataTableFilter = ({ columnId, title, options, className }: DataTab
       <PopoverContent align="start" className="w-56 gap-1 p-1">
         <div className="flex flex-col">
           {options.map((option) => {
-            const checked = option.value === selected;
+            const checked = selected.has(option.value);
             return (
               <button
                 key={option.value}
                 type="button"
                 onClick={() => toggle(option.value)}
-                aria-pressed={checked}
                 className="flex items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm hover:bg-accent hover:text-accent-foreground"
               >
-                <span
-                  className={cn(
-                    "flex aspect-square size-4 shrink-0 items-center justify-center rounded-full border border-input",
-                    checked && "border-primary bg-primary",
-                  )}
-                >
-                  {checked && <span className="size-2 rounded-full bg-primary-foreground" />}
-                </span>
+                <Checkbox checked={checked} className="pointer-events-none" tabIndex={-1} />
                 <span className="flex-1 truncate">{option.label}</span>
               </button>
             );
           })}
         </div>
+        {selected.size > 0 && (
+          <>
+            <Separator className="mt-1" />
+            <button
+              type="button"
+              onClick={() => column.setFilterValue(undefined)}
+              className="w-full rounded-md px-2 py-1.5 text-center text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+            >
+              Clear filter
+            </button>
+          </>
+        )}
       </PopoverContent>
     </Popover>
   );
